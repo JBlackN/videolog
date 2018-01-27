@@ -1,0 +1,17 @@
+<div class="top-bar">
+  <div class="top-bar-left">
+    <ul class="menu">
+      <li class="menu-text">YouTube Archive</li>
+    </ul>
+  </div>
+  <div class="top-bar-right">
+    <ul class="dropdown menu" data-dropdown-menu>
+      <li>
+        <a id="user" href="#"><img src="{{ user['thumbnail'] }}">{{ user['name'] }}</a>
+        <ul class="menu">
+          <li><a href="{{ url_for('logout') }}">Log Out</a></li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
