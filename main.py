@@ -1,3 +1,4 @@
+import json
 import os
 
 import flask
@@ -19,7 +20,22 @@ def index(user = None):
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
 
-    return flask.render_template('index.html', user = yt_get_user())
+    user = yt_get_user()
+    flask.session['user'] = user['id']
+
+    db = get_db()
+    if user['id'] not in db:
+        db[user['id']] = {}
+    update_db(db)
+
+    return flask.render_template('index.html', user = user)
+
+def get_db():
+    return json.load(open('db.json'))
+
+def update_db(db):
+    with open('db.json', 'w') as f:
+        json.dump(db, f, indent = 2, sort_keys = True)
 
 def yt_get_user():
     client = yt_get_client()
@@ -27,7 +43,8 @@ def yt_get_user():
     snippet = response['items'][0]['snippet']
     return {
         'thumbnail': snippet['thumbnails']['default']['url'],
-        'name': snippet['title']
+        'name': snippet['title'],
+        'id': response['items'][0]['id']
     }
 
 def yt_get_client():
@@ -86,4 +103,7 @@ def logout():
 
 if __name__ == '__main__':
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' # TODO: rm in production
+    if not os.path.isfile('db.json'):
+        with open('db.json', 'w') as f:
+            json.dump({}, f, indent = 2, sort_keys = True)
     app.run('localhost', 8090, debug = True)
