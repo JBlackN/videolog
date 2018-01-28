@@ -1,12 +1,17 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<ul>
+  {% for item in items %}
+    <li>{{ item['snippet']['title'] }}</li>
+  {% endfor %}
+</ul>
 {% endblock %}
 
 {% block scripts %}
   <script type="text/javascript">
     $(document).ready(function() {
-      $('#menu-videos').addClass('is-active');
+      $('#menu-channels').addClass('is-active');
     });
   </script>
 {% endblock %}

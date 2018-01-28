@@ -20,15 +20,15 @@ def index(user = None):
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
 
-    user = yt_get_user()
-    flask.session['user'] = user['id']
+    return flask.render_template('index.html', user = flask.session['user'])
 
-    db = get_db()
-    if user['id'] not in db:
-        db[user['id']] = {}
-    update_db(db)
+@app.route('/channels')
+def channels(user = None, items = []):
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
 
-    return flask.render_template('index.html', user = user)
+    return flask.render_template('channels.html', user = flask.session['user'],
+        items = yt_get_subscriptions())
 
 def get_db():
     return json.load(open('db.json'))
@@ -46,6 +46,24 @@ def yt_get_user():
         'name': snippet['title'],
         'id': response['items'][0]['id']
     }
+
+def yt_get_subscriptions():
+    client = yt_get_client()
+    kwargs = {
+        'part': 'snippet', 'mine': True,
+        'order': 'alphabetical', 'maxResults': 50
+    }
+    items = []
+    while True:
+        response = client.subscriptions().list(**kwargs).execute()
+
+        for item in response['items']:
+            items.append(item)
+
+        if 'nextPageToken' not in response:
+            return items
+        else:
+            kwargs['pageToken'] = response['nextPageToken']
 
 def yt_get_client():
     credentials = google.oauth2.credentials.Credentials(
@@ -93,6 +111,12 @@ def oauth2callback():
         'client_secret': credentials.client_secret,
         'scopes': credentials.scopes
     }
+    flask.session['user'] = yt_get_user()
+
+    db = get_db()
+    if flask.session['user']['id'] not in db:
+        db[flask.session['user']['id']] = {}
+    update_db(db)
 
     return flask.redirect(flask.url_for('index'))
 
