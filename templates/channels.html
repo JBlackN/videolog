@@ -70,11 +70,11 @@
             <img class="mr-3" src="{{ item['snippet']['thumbnails']['default']['url'] }}">
             <div class="media-body">
               <h5 class="mt-0">{{ item['snippet']['title'] }}</h5>
-              <a class="btn btn-danger channels-untrack" href="#" role="button" data-channel-id="{{ item['id'] }}">Untrack</a>
+              <a class="btn btn-outline-danger channels-untrack" href="#" role="button" data-channel-id="{{ item['id'] }}">Untrack</a>
               {% if item['id'] in subs %}
-              <a class="btn btn-danger channels-unsub" href="#" role="button" data-subscription-id="{{ subs[item['id']] }}">Unsubscribe</a>
+              <a class="btn btn-outline-danger channels-unsub" href="#" role="button" data-subscription-id="{{ subs[item['id']] }}">Unsubscribe</a>
               {% else %}
-              <a class="btn btn-success channels-sub" href="#" role="button" data-channel-id="{{ item['id'] }}">Subscribe</a>
+              <a class="btn btn-outline-success channels-sub" href="#" role="button" data-channel-id="{{ item['id'] }}">Subscribe</a>
               {% endif %}
             </div>
           </div>
