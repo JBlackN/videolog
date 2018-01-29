@@ -58,7 +58,9 @@ def channels_update():
         for channel_id, tracked in json.loads(urllib.parse.unquote(tracks)).items():
             if tracked:
                 if channel_id not in db[flask.session['user']['id']]:
-                    db[flask.session['user']['id']][channel_id] = {}
+                    db[flask.session['user']['id']][channel_id] = {
+                        'played': {}, 'archived': {}
+                    }
             else:
                 if channel_id in db[flask.session['user']['id']]:
                     db[flask.session['user']['id']].pop(channel_id)
@@ -75,25 +77,33 @@ def channels_update():
                     response = client.channels().list(
                         part = 'snippet', forUsername = user
                     ).execute()
-                    db[flask.session['user']['id']][response['items'][0]['id']] = {}
+                    db[flask.session['user']['id']][response['items'][0]['id']] = {
+                        'played': {}, 'archived': {}
+                    }
                 elif '/channel/' in url:
                     channel_id = url.rsplit('/', 1)[-1]
                     response = client.channels().list(
                         part = 'snippet', id = channel_id
                     ).execute()
-                    db[flask.session['user']['id']][response['items'][0]['id']] = {}
+                    db[flask.session['user']['id']][response['items'][0]['id']] = {
+                        'played': {}, 'archived': {}
+                    }
                 else:
                     raise
             elif query_data['type'] == 'user':
                 response = client.channels().list(
                     part = 'snippet', forUsername = query_data['value']
                 ).execute()
-                db[flask.session['user']['id']][response['items'][0]['id']] = {}
+                db[flask.session['user']['id']][response['items'][0]['id']] = {
+                    'played': {}, 'archived': {}
+                }
             elif query_data['type'] == 'id':
                 response = client.channels().list(
                     part = 'snippet', id = query_data['value']
                 ).execute()
-                db[flask.session['user']['id']][response['items'][0]['id']] = {}
+                db[flask.session['user']['id']][response['items'][0]['id']] = {
+                    'played': {}, 'archived': {}
+                }
         except:
             flask.session['channels_query_error'] = True
             return flask.redirect('channels')
@@ -208,7 +218,7 @@ def build_resource(properties):
         for pa in range(0, len(prop_array)):
             is_array = False
             key = prop_array[pa]
-            
+
             # For properties that have array values, convert a name like
             # "snippet.tags[]" to snippet.tags, and set a flag to handle
             # the value as an array.
