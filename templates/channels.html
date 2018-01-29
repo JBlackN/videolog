@@ -1,17 +1,145 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<ul>
-  {% for item in items %}
-    <li>{{ item['snippet']['title'] }}</li>
-  {% endfor %}
-</ul>
+{% if tracking %}
+<div class="container-fluid py-3">
+  <div class="row mb-3">
+    <div class="col text-center">
+      <a class="btn btn-danger" href="{{ url_for('channels') }}" role="button">Discard changes</a>
+      <a id="channels-track-save" class="btn btn-success" href="#" role="button">Save changes</a>
+    </div>
+  </div>
+  <div class="row">
+    {% for item in subs %}
+    <div class="col-md-6 col-lg-3">
+      <div class="card">
+        <div class="card-body">
+          <div class="media">
+            <img class="mr-3" src="{{ item['snippet']['thumbnails']['default']['url'] }}">
+            <div class="media-body">
+              <h5 class="mt-0" data-channel-id="{{ item['snippet']['resourceId']['channelId'] }}">{{ item['snippet']['title'] }}</h5>
+              <input type="checkbox" {% if item['snippet']['resourceId']['channelId'] in tracks %}checked{% else %}{% endif %} data-toggle="toggle" data-on="Tracked" data-off="Untracked" data-onstyle="success" data-offstyle="danger">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% else %}
+<div class="container mt-3">
+  <div class="row">
+    <div class="col-sm-6 text-center">
+      <a class="btn btn-primary" href="{{ url_for('channels_track') }}" role="button">Track using connected account</a>
+    </div>
+    <div class="col-sm-6 text-center">
+      <div class="input-group">
+        <input id="channels-value" type="text" class="form-control" aria-label="Text input with dropdown button">
+        <div class="input-group-append">
+          <button class="btn btn-success dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Track by</button>
+          <div class="dropdown-menu">
+            <a id="channels-url" class="dropdown-item" href="#">YouTube URL</a>
+            <a id="channels-user" class="dropdown-item" href="#">YouTube channel name</a>
+            <a id="channels-id" class="dropdown-item" href="#">YouTube channel ID</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% if error %}
+  <div class="row mt-3">
+    <div class="col">
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Error!</strong> The value you entered was invalid.
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+<div class="container-fluid mt-3">
+  <div class="row">
+    {% for item in tracks %}
+    <div class="col-md-6 col-lg-3">
+      <div class="card">
+        <div class="card-body">
+          <div class="media">
+            <img class="mr-3" src="{{ item['snippet']['thumbnails']['default']['url'] }}">
+            <div class="media-body">
+              <h5 class="mt-0">{{ item['snippet']['title'] }}</h5>
+              <a class="btn btn-danger channels-untrack" href="#" role="button" data-channel-id="{{ item['id'] }}">Untrack</a>
+              {% if item['id'] in subs %}
+              <a class="btn btn-danger channels-unsub" href="#" role="button" data-subscription-id="{{ subs[item['id']] }}">Unsubscribe</a>
+              {% else %}
+              <a class="btn btn-success channels-sub" href="#" role="button" data-channel-id="{{ item['id'] }}">Subscribe</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block scripts %}
   <script type="text/javascript">
     $(document).ready(function() {
       $('#menu-channels').addClass('active');
+
+      $('#channels-url').click(function() {
+        var query = { type: 'url', value: $('#channels-value').val() };
+        window.location = '../channels-update?query=' + encodeURIComponent(JSON.stringify(query));
+      });
+
+      $('#channels-user').click(function() {
+        var query = { type: 'user', value: $('#channels-value').val() };
+        window.location = '../channels-update?query=' + encodeURIComponent(JSON.stringify(query));
+      });
+
+      $('#channels-id').click(function() {
+        var query = { type: 'id', value: $('#channels-value').val() };
+        window.location = '../channels-update?query=' + encodeURIComponent(JSON.stringify(query));
+      });
+
+      $('.channels-untrack').click(function() {
+        var updates = {};
+        updates[$(this).data('channelId')] = false;
+        window.location = '../channels-update?tracks=' + encodeURIComponent(JSON.stringify(updates));
+      });
+
+      $('.channels-unsub').click(function() {
+        var update = {
+          id: $(this).data('subscriptionId'),
+          subscribe: false,
+          redirect: 'channels'
+        };
+        window.location = '../channels-subscriptions?update=' + encodeURIComponent(JSON.stringify(update));
+      });
+
+      $('.channels-sub').click(function() {
+        var update = {
+          id: $(this).data('channelId'),
+          subscribe: true,
+          redirect: 'channels'
+        };
+        window.location = '../channels-subscriptions?update=' + encodeURIComponent(JSON.stringify(update));
+      });
+
+      $('#channels-track-save').click(function() {
+        var updates = {};
+
+        $('.media-body').each(function() {
+          updates[$(this).find('h5').data('channelId')] = $(this).find('input').prop('checked');
+        });
+
+        window.location = '../channels-update?tracks=' + encodeURIComponent(JSON.stringify(updates));
+      });
     });
   </script>
 {% endblock %}
