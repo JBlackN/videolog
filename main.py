@@ -18,11 +18,28 @@ app = flask.Flask(__name__)
 app.secret_key = b'\xfb\x04\x088E6\xff\xd2\x86\x93\xcef%\x1b\xe6F9`o\xb8\xbd\xc3\xf3['
 
 @app.route('/')
-def index(user = None):
+def index():
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
 
-    return flask.render_template('index.html', user = flask.session['user'])
+    return flask.redirect('videos')
+
+
+@app.route('/videos')
+@app.route('/videos/<channel>')
+def videos(user = None, tracks = [], channel = None):
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+
+    tracks = yt_get_tracks(sort_by_played = True)
+
+    if channel is None and tracks:
+        return flask.redirect(flask.url_for('videos', channel = tracks[0]['id']))
+    else:
+        return flask.render_template('index.html', user = flask.session['user'],
+            tracks = tracks, channel = channel,
+            videos = yt_get_channel_videos(channel)
+        )
 
 @app.route('/channels')
 def channels(user = None, subs = None, tracks = [], tracking = False, error = False):
@@ -187,17 +204,67 @@ def yt_get_subscriptions(list_only = False):
         else:
             kwargs['pageToken'] = response['nextPageToken']
 
-def yt_get_tracks():
+def yt_get_tracks(sort_by_played = False):
+    db = get_db()
     tracks = []
 
     for channel_id in db_get_channels():
         client = yt_get_client()
         response = client.channels().list(
-            part = 'snippet', id = channel_id
+            part = 'snippet,statistics', id = channel_id
         ).execute()
+
+        response['items'][0]['statistics']['videoCount'] = int(
+            response['items'][0]['statistics']['videoCount']
+        )
+        response['items'][0]['statistics']['playedCount'] = len(
+            db[flask.session['user']['id']][channel_id]['played']
+        )
+        response['items'][0]['statistics']['playedPercentage'] = (
+            response['items'][0]['statistics']['playedCount'] /
+            response['items'][0]['statistics']['videoCount']
+        ) * 100
         tracks.append(response['items'][0])
 
-    return sorted(tracks, key = lambda item: item['snippet']['title'])
+    if sort_by_played:
+        return sorted(tracks,
+            key = lambda item: (
+                -item['statistics']['playedPercentage'],
+                item['snippet']['title']
+            )
+        )
+    else:
+        return sorted(tracks, key = lambda item: item['snippet']['title'])
+
+def yt_get_channel_videos(channel_id):
+    db = get_db()
+    client = yt_get_client()
+    kwargs = {
+        'part': 'snippet', 'channelId': channel_id,
+        'order': 'date', 'maxResults': 50, 'type': 'video'
+    }
+    items = []
+
+    while True:
+        response = client.search().list(**kwargs).execute()
+
+        for item in response['items']:
+            if item['id']['videoId'] in db[flask.session['user']['id']][channel_id]['played']:
+                item['played'] = db[flask.session['user']['id']][channel_id]['played'][item['id']['videoId']]
+            else:
+                item['played'] = None
+
+            if item['id']['videoId'] in db[flask.session['user']['id']][channel_id]['archived']:
+                item['archived'] = db[flask.session['user']['id']][channel_id]['archived'][item['id']['videoId']]
+            else:
+                item['archived'] = None
+
+            items.append(item)
+
+        if 'nextPageToken' not in response:
+            return items
+        else:
+            kwargs['pageToken'] = response['nextPageToken']
 
 def yt_get_client():
     credentials = google.oauth2.credentials.Credentials(

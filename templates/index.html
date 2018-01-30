@@ -1,12 +1,80 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<div class="container-fluid py-3">
+  <div class="row">
+    {% if tracks %}
+    <div class="col-lg-3">
+      <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
+        {% for item in tracks %}
+        <label class="btn btn-outline-dark {% if channel == item['id'] %}active{% endif %}">
+          <input type="radio" name="options" id="{{ item['id'] }}" autocomplete="off" {% if channel == item['id'] %}checked{% endif %}>
+          <div class="media">
+            <img class="align-self-center mr-3" src="{{ item['snippet']['thumbnails']['default']['url'] }}">
+            <div class="media-body">
+              <h5 class="mt-3">{{ item['snippet']['title'] }}</h5>
+              <div class="progress">
+                <div class="progress-bar bg-info" role="progressbar" style="width: {{ item['statistics']['playedPercentage'] }}%" aria-valuenow="{{ item['statistics']['playedPercentage'] }}" aria-valuemin="0" aria-valuemax="100">{{ '%.2f' % item['statistics']['playedPercentage'] }}%</div>
+              </div>
+            </div>
+          </div>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="col-lg-9">
+      <div class="container-fluid">
+        <div class="row">
+          {% for video in videos %}
+          <div class="col-md-6 col-lg-3">
+            <div class="video card mb-3">
+              <img class="card-img-top" src="{{ video['snippet']['thumbnails']['high']['url'] }}">
+              <div class="card-body">
+                <h6 class="card-title">{{ video['snippet']['title'] }}</h6>
+                <h6 class="card-subtitle text-muted">{{ video['snippet']['publishedAt'] }}</h6>
+              </div>
+              <div class="card-footer text-muted">
+                {% if video['played'] is not none %}
+                  <span class="badge badge-success" title="{{ video['played'] }}">Played</span>
+                {% else %}
+                  <span class="badge badge-danger">Unplayed</span>
+                {% endif %}
+                {% if video['archived'] is not none %}
+                  <span class="badge badge-info" title="{{ video['archived'] }}">Archived</span>
+                {% else %}
+                  <span class="badge badge-warning">Unarchived</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+      <div class="alert alert-info" role="alert">
+        Go to the 'Channels' menu to start tracking some YouTube channels.
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
   <script type="text/javascript">
     $(document).ready(function() {
       $('#menu-videos').addClass('active');
+
+      $('.video').hover(
+        function() { $(this).addClass('border'); $(this).addClass('border-primary'); },
+        function() { $(this).removeClass('border'); $(this).removeClass('border-primary'); }
+      );
+
+      $('input[name="options"]').change(function() {
+        window.location = '../videos/' + $(this).attr('id');
+      });
     });
   </script>
 {% endblock %}
