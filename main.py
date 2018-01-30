@@ -303,6 +303,50 @@ def video_unsubscribe(channel = None, video = None):
 
         return flask.jsonify(True)
 
+@app.route('/api/videos/<channel>/<video>/comments')
+def video_comments(channel = None, video = None):
+    if 'credentials' not in flask.session:
+        return flask.jsonify(False)
+
+    if channel is not None and video is not None:
+        comments = []
+
+        for thread in yt_get_comments(video):
+            thread_comment = thread['snippet']['topLevelComment']
+
+            comment = {
+                'author': {
+                    'id': thread_comment['snippet']['authorChannelId']['value'],
+                    'image': thread_comment['snippet']['authorProfileImageUrl'],
+                    'name': thread_comment['snippet']['authorDisplayName']
+                },
+                'created': thread_comment['snippet']['publishedAt'],
+                'likes': thread_comment['snippet']['likeCount'],
+                'modified': thread_comment['snippet']['updatedAt'],
+                'replies': [],
+                'text': thread_comment['snippet']['textDisplay']
+            }
+
+            for reply in thread['replies']['comments']:
+                comment['replies'].append({
+                    'author': {
+                        'id': reply['snippet']['authorChannelId']['value'],
+                        'image': reply['snippet']['authorProfileImageUrl'],
+                        'name': reply['snippet']['authorDisplayName']
+                    },
+                    'created': reply['snippet']['publishedAt'],
+                    'likes': reply['snippet']['likeCount'],
+                    'modified': reply['snippet']['updatedAt'],
+                    'text': reply['snippet']['textDisplay']
+                })
+
+            comments.append(comment)
+
+        return flask.Response(json.dumps(comments, indent = 2, sort_keys = True),
+            mimetype = 'application/json',
+            headers = { 'Content-Disposition': 'attachment;filename=' + video + '.comments.json' }
+        )
+
 def get_db():
     return json.load(open('db.json'))
 
