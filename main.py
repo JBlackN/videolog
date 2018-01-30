@@ -345,7 +345,7 @@ def yt_get_playlists():
                 playlists[playlist_id]['videos'] = videos
                 break
             else:
-                kwargs['pageToken'] = response['nextPageToken']
+                kwargs2['pageToken'] = response['nextPageToken']
 
     return playlists
 
