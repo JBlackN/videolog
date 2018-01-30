@@ -87,6 +87,14 @@
               }
             </script>
           </div>
+          {% else %}
+          <div class="col-12">
+            <div class="alert alert-info" role="alert">
+              <h4 class="alert-heading">This video has to be viewed directly on YouTube</h4>
+              <p>Click <a href="https://www.youtube.com/watch?v={{ video['id'] }}" target="_blank" class="alert-link">here</a> to open YouTube in a new tab. Watch the video there, return back here and click the <strong>Mark as played</strong> button below to signify that you watched it.</p>
+            </div>
+          </div>
+          {% endif %}
           <div class="col-lg-6 mt-3">
             <h2>{{ video['snippet']['title'] }}</h2>
           </div>
@@ -210,9 +218,6 @@
             </div>
             {% endfor %}
           </div>
-          {% else %}
-          <!--- TODO -->
-          {% endif %}
         </div>
       </div>
       {% else %}
