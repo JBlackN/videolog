@@ -358,41 +358,44 @@ def yt_get_comments(video_id):
     }
     threads = []
 
-    while True:
-        response = client.commentThreads().list(**kwargs).execute()
+    try:
+        while True:
+            response = client.commentThreads().list(**kwargs).execute()
 
-        for thread in response['items']:
-            threads.append(thread)
+            for thread in response['items']:
+                threads.append(thread)
 
-        if 'nextPageToken' not in response:
-            threads.sort(key = lambda thread: thread['snippet']['topLevelComment']['snippet']['publishedAt'])
-            break
-        else:
-            kwargs['pageToken'] = response['nextPageToken']
+            if 'nextPageToken' not in response:
+                threads.sort(key = lambda thread: thread['snippet']['topLevelComment']['snippet']['publishedAt'])
+                break
+            else:
+                kwargs['pageToken'] = response['nextPageToken']
 
-    for thread in threads:
-        if thread['snippet']['totalReplyCount'] > 0:
-            kwargs2 = {
-                'part': 'snippet', 'maxResults': 100,
-                'parentId': thread['snippet']['topLevelComment']['id']
-            }
-            replies = []
+        for thread in threads:
+            if thread['snippet']['totalReplyCount'] > 0:
+                kwargs2 = {
+                    'part': 'snippet', 'maxResults': 100,
+                    'parentId': thread['snippet']['topLevelComment']['id']
+                }
+                replies = []
 
-            while True:
-                response2 = client.comments().list(**kwargs2).execute()
+                while True:
+                    response2 = client.comments().list(**kwargs2).execute()
 
-                for reply in response2['items']:
-                    replies.append(reply)
+                    for reply in response2['items']:
+                        replies.append(reply)
 
-                if 'nextPageToken' not in response:
-                    thread['replies'] = {
-                        'comments': sorted(replies, key = lambda reply: reply['snippet']['publishedAt'])
-                    }
-                    break
-                else:
-                    kwargs2['pageToken'] = response['nextPageToken']
-        else:
-            thread['replies'] = { 'comments': [] }
+                    if 'nextPageToken' not in response:
+                        thread['replies'] = {
+                            'comments': sorted(replies, key = lambda reply: reply['snippet']['publishedAt'])
+                        }
+                        break
+                    else:
+                        kwargs2['pageToken'] = response['nextPageToken']
+            else:
+                thread['replies'] = { 'comments': [] }
+    except:
+        return []
 
     return threads
 
