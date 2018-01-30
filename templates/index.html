@@ -76,19 +76,19 @@
               }
             </script>
           </div>
-          <div class="col-lg-7 mt-3">
+          <div class="col-lg-6 mt-3">
             <h2>{{ video['snippet']['title'] }}</h2>
           </div>
-          <div class="col-lg-5 text-right mt-3">
+          <div class="col-lg-6 text-right mt-3">
             {% if video['played'] is not none %}
-            <a class="btn btn-outline-danger" href="#" role="button">Mark as unplayed</a>
+            <a id="videos-mark-unplayed" class="btn btn-outline-danger" href="#" role="button">Mark as unplayed</a>
             {% else %}
-            <a class="btn btn-outline-success" href="#" role="button">Mark as played</a>
+            <a id="videos-mark-played" class="btn btn-outline-success" href="#" role="button">Mark as played</a>
             {% endif %}
             {% if video['archived'] is not none %}
-            <a class="btn btn-outline-warning" href="#" role="button">Unarchive</a>
+            <a id="videos-unarchive" class="btn btn-outline-warning" href="#" role="button">Unarchive</a>
             {% else %}
-            <a class="btn btn-outline-info" href="#" role="button">Archive</a>
+            <a id="videos-archive" class="btn btn-outline-info" href="#" role="button">Archive</a>
             {% endif %}
             <div class="dropdown show d-inline-block">
               <a class="btn btn-outline-{% if video['rating'] == 'like' %}success{% elif video['rating'] == 'dislike' %}danger{% else %}warning{% endif %} dropdown-toggle" href="#" role="button" id="video-rating" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -97,14 +97,14 @@
 
               <div class="dropdown-menu" aria-labelledby="video-rating">
                 {% if video['rating'] == 'like' %}
-                <a class="dropdown-item" href="#">Dislike</a>
-                <a class="dropdown-item" href="#">Unrate</a>
+                <a id="videos-dislike" class="dropdown-item" href="#">Dislike</a>
+                <a id="videos-unrate" class="dropdown-item" href="#">Unrate</a>
                 {% elif video['rating'] == 'dislike' %}
-                <a class="dropdown-item" href="#">Like</a>
-                <a class="dropdown-item" href="#">Unrate</a>
+                <a id="videos-like" class="dropdown-item" href="#">Like</a>
+                <a id="videos-unrate" class="dropdown-item" href="#">Unrate</a>
                 {% else %}
-                <a class="dropdown-item" href="#">Like</a>
-                <a class="dropdown-item" href="#">Dislike</a>
+                <a id="videos-like" class="dropdown-item" href="#">Like</a>
+                <a id="videos-dislike" class="dropdown-item" href="#">Dislike</a>
                 {% endif %}
               </div>
             </div>
@@ -115,10 +115,10 @@
 
               <div class="dropdown-menu" aria-labelledby="video-playlists">
                 <form class="px-4 py-3">
-                  <a class="btn btn-outline-primary mb-3" href="#" role="button">Update playlists</a>
+                  <a id="video-playlists-update" class="btn btn-outline-primary mb-3" href="#" role="button">Update playlists</a>
                   {% for playlist_id, data in video['playlists'].items() %}
                   <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="{{ playlist_id }}" {% if data['included'] %}checked{% endif %}>
+                    <input type="checkbox" class="form-check-input video-playlist" id="{{ playlist_id }}" {% if data['included'] %}checked{% endif %}>
                     <label class="form-check-label" for="{{ playlist_id }}">
                       {{ data['title'] }}
                     </label>
@@ -128,9 +128,9 @@
               </div>
             </div>
             {% if channel in subs %}
-            <a class="btn btn-outline-danger" href="#" role="button">Unsubscribe</a>
+            <a id="videos-unsubscribe" class="btn btn-outline-danger" href="#" role="button">Unsubscribe</a>
             {% else %}
-            <a class="btn btn-outline-success" href="#" role="button">Subscribe</a>
+            <a id="videos-subscribe" class="btn btn-outline-success" href="#" role="button">Subscribe</a>
             {% endif %}
           </div>
           <div class="col-12">
@@ -235,6 +235,146 @@
       $('input[name="options"]').change(function() {
         window.location = window.location.origin + '/videos/' + $(this).attr('id');
       });
+
+      {% if video %}
+      $('#videos-mark-played').click(function() {
+        url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/play';
+        $.get(url, function(result) {
+          if (result) {
+            window.location.reload(true);
+          }
+        });
+      });
+
+      $('#videos-mark-unplayed').click(function() {
+        url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/unplay';
+        $.get(url, function(result) {
+          if (result) {
+            window.location.reload(true);
+          }
+        });
+      });
+
+      $('#videos-archive').click(function() {
+        url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/archive';
+        $.get(url, function(result) {
+          if (result) {
+            window.location.reload(true);
+          }
+        });
+      });
+
+      $('#videos-unarchive').click(function() {
+        url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/unarchive';
+        $.get(url, function(result) {
+          if (result) {
+            window.location.reload(true);
+          }
+        });
+      });
+
+      $('#videos-like').click(function() {
+        $('#video-rating').addClass('disabled');
+        $('#video-rating').prop('aria-disabled', true);
+        $('#video-rating').append(' <i class="fas fa-spinner fa-spin"></i>');
+
+        url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/rate?rating=like';
+        $.get(url, function(result) {
+          if (result) {
+            (function(ms) { return new Promise(resolve => setTimeout(resolve, ms)); })(10000).then(() => {
+              window.location.reload(true);
+            });
+          }
+        });
+      });
+
+      $('#videos-dislike').click(function() {
+        $('#video-rating').addClass('disabled');
+        $('#video-rating').prop('aria-disabled', true);
+        $('#video-rating').append(' <i class="fas fa-spinner fa-spin"></i>');
+
+        url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/rate?rating=dislike';
+        $.get(url, function(result) {
+          if (result) {
+            (function(ms) { return new Promise(resolve => setTimeout(resolve, ms)); })(10000).then(() => {
+              window.location.reload(true);
+            });
+          }
+        });
+      });
+
+      $('#videos-unrate').click(function() {
+        $('#video-rating').addClass('disabled');
+        $('#video-rating').prop('aria-disabled', true);
+        $('#video-rating').append(' <i class="fas fa-spinner fa-spin"></i>');
+
+        url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/rate?rating=none';
+        $.get(url, function(result) {
+          if (result) {
+            (function(ms) { return new Promise(resolve => setTimeout(resolve, ms)); })(10000).then(() => {
+              window.location.reload(true);
+            });
+          }
+        });
+      });
+
+      $('#video-playlists-update').click(function() {
+        $('#video-playlists-update').addClass('disabled');
+        $('#video-playlists-update').prop('aria-disabled', true);
+        $('#video-playlists-update').append(' <i class="fas fa-spinner fa-spin"></i>');
+
+        var reference = {};
+        {% for playlist_id, data in video['playlists'].items() %}
+        reference['{{ playlist_id }}'] = {% if data['included'] %}true{% else %}false{% endif %};
+        {% endfor %}
+
+        var playlists = {};
+        $('.video-playlist').each(function() {
+          if (reference[$(this).prop('id')] != $(this).prop('checked')) {
+            playlists[$(this).prop('id')] = $(this).prop('checked');
+          }
+        });
+
+        url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/playlists?data=' + encodeURIComponent(JSON.stringify(playlists));
+        $.get(url, function(result) {
+          if (result) {
+            (function(ms) { return new Promise(resolve => setTimeout(resolve, ms)); })(10000).then(() => {
+              window.location.reload(true);
+            });
+          }
+        });
+      });
+
+      $('#videos-subscribe').click(function() {
+        $('#videos-subscribe').addClass('disabled');
+        $('#videos-subscribe').prop('aria-disabled', true);
+        $('#videos-subscribe').append(' <i class="fas fa-spinner fa-spin"></i>');
+
+        url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/subscribe';
+        $.get(url, function(result) {
+          if (result) {
+            (function(ms) { return new Promise(resolve => setTimeout(resolve, ms)); })(10000).then(() => {
+              window.location.reload(true);
+            });
+          }
+        });
+      });
+
+      $('#videos-unsubscribe').click(function() {
+        $('#videos-unsubscribe').addClass('disabled');
+        $('#videos-unsubscribe').prop('aria-disabled', true);
+        $('#videos-unsubscribe').append(' <i class="fas fa-spinner fa-spin"></i>');
+
+        url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/unsubscribe';
+        $.get(url, function(result) {
+          if (result) {
+            (function(ms) { return new Promise(resolve => setTimeout(resolve, ms)); })(10000).then(() => {
+              window.location.reload(true);
+            });
+          }
+        });
+      });
+      {% endif %}
     });
   </script>
 {% endblock %}

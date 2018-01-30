@@ -114,6 +114,10 @@
       });
 
       $('.channels-unsub').click(function() {
+        $(this).addClass('disabled');
+        $(this).prop('aria-disabled', true);
+        $(this).append(' <i class="fas fa-spinner fa-spin"></i>');
+
         var update = {
           id: $(this).data('subscriptionId'),
           subscribe: false,
@@ -123,6 +127,10 @@
       });
 
       $('.channels-sub').click(function() {
+        $(this).addClass('disabled');
+        $(this).prop('aria-disabled', true);
+        $(this).append(' <i class="fas fa-spinner fa-spin"></i>');
+
         var update = {
           id: $(this).data('channelId'),
           subscribe: true,

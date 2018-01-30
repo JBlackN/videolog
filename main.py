@@ -1,6 +1,8 @@
+import datetime
 import json
 import os
 import re
+import time
 import urllib
 
 import flask
@@ -160,9 +162,146 @@ def channels_subscriptions():
                 id = update_data['id']
             ).execute()
 
+        time.sleep(10)
         return flask.redirect(update_data['redirect'])
 
     return flask.redirect('channels')
+
+@app.route('/api/videos/<channel>/<video>/play')
+def video_play(channel = None, video = None):
+    if 'credentials' not in flask.session:
+        return flask.jsonify(False)
+
+    if channel is not None and video is not None:
+        db = get_db()
+        if video not in db[flask.session['user']['id']][channel]['played']:
+            db[flask.session['user']['id']][channel]['played'][video] = datetime.datetime.utcnow().replace(microsecond = 0, tzinfo = datetime.timezone.utc).isoformat();
+            update_db(db)
+
+        return flask.jsonify(True)
+
+@app.route('/api/videos/<channel>/<video>/unplay')
+def video_unplay(channel = None, video = None):
+    if 'credentials' not in flask.session:
+        return flask.jsonify(False)
+
+    if channel is not None and video is not None:
+        db = get_db()
+        if video in db[flask.session['user']['id']][channel]['played']:
+            db[flask.session['user']['id']][channel]['played'].pop(video)
+            update_db(db)
+
+        return flask.jsonify(True)
+
+@app.route('/api/videos/<channel>/<video>/archive')
+def video_archive(channel = None, video = None):
+    if 'credentials' not in flask.session:
+        return flask.jsonify(False)
+
+    if channel is not None and video is not None:
+        db = get_db()
+        db[flask.session['user']['id']][channel]['archived'][video] = datetime.datetime.utcnow().replace(microsecond = 0, tzinfo = datetime.timezone.utc).isoformat();
+        update_db(db)
+
+        return flask.jsonify(True)
+
+@app.route('/api/videos/<channel>/<video>/unarchive')
+def video_unarchive(channel = None, video = None):
+    if 'credentials' not in flask.session:
+        return flask.jsonify(False)
+
+    if channel is not None and video is not None:
+        db = get_db()
+        if video in db[flask.session['user']['id']][channel]['archived']:
+            db[flask.session['user']['id']][channel]['archived'].pop(video)
+            update_db(db)
+
+        return flask.jsonify(True)
+
+@app.route('/api/videos/<channel>/<video>/rate')
+def video_rate(channel = None, video = None):
+    if 'credentials' not in flask.session:
+        return flask.jsonify(False)
+
+    rating = flask.request.args.get('rating', None)
+
+    if channel is not None and video is not None and (
+        rating == 'like' or rating == 'dislike' or rating == 'none'
+    ):
+        yt_get_client().videos().rate(id = video, rating = rating).execute()
+        return flask.jsonify(True)
+
+@app.route('/api/videos/<channel>/<video>/playlists')
+def video_playlists(channel = None, video = None):
+    if 'credentials' not in flask.session:
+        return flask.jsonify(False)
+
+    data = flask.request.args.get('data', None)
+
+    if channel is not None and video is not None and data is not None:
+        client = yt_get_client()
+
+        for playlist_id, include in json.loads(urllib.parse.unquote(data)).items():
+            if include:
+                client.playlistItems().insert(
+                    body = build_resource({
+                        'snippet.playlistId': playlist_id,
+                        'snippet.resourceId.kind': 'youtube#video',
+                        'snippet.resourceId.videoId': video
+                    }),
+                    part = 'snippet'
+                ).execute()
+            else:
+                kwargs = {
+                    'part': 'snippet', 'maxResults': 50,
+                    'playlistId': playlist_id
+                }
+                items = []
+
+                while True:
+                    response = client.playlistItems().list(**kwargs).execute()
+
+                    for item in response['items']:
+                        if item['snippet']['resourceId']['videoId'] == video:
+                            client.playlistItems().delete(id = item['id']).execute()
+                            break
+
+                    if 'nextPageToken' not in response:
+                        break
+                    else:
+                        kwargs['pageToken'] = response['nextPageToken']
+
+        return flask.jsonify(True)
+
+@app.route('/api/videos/<channel>/<video>/subscribe')
+def video_subscribe(channel = None, video = None):
+    if 'credentials' not in flask.session:
+        return flask.jsonify(False)
+
+    if channel is not None and video is not None:
+        yt_get_client().subscriptions().insert(
+            body = build_resource({
+                'snippet.resourceId.kind': 'youtube#channel',
+                'snippet.resourceId.channelId': channel
+            }),
+            part = 'snippet'
+        ).execute()
+
+        return flask.jsonify(True)
+
+@app.route('/api/videos/<channel>/<video>/unsubscribe')
+def video_unsubscribe(channel = None, video = None):
+    if 'credentials' not in flask.session:
+        return flask.jsonify(False)
+
+    if channel is not None and video is not None:
+        for subscription in yt_get_subscriptions():
+            if subscription['snippet']['resourceId']['channelId'] == channel:
+                yt_get_client().subscriptions().delete(
+                    id = subscription['id']
+                ).execute()
+
+        return flask.jsonify(True)
 
 def get_db():
     return json.load(open('db.json'))
