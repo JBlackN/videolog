@@ -158,7 +158,46 @@
             </a>
           </div>
           <div class="col-12 mt-3">
-            <h3>Comments</h3>
+            <h3 class="mb-0">Comments <a class="btn btn-outline-warning d-inline-block" href="#" role="button">Download</a></h3>
+          </div>
+          <div class="col-12">
+            {% for comment in video['comments'] %}
+            <div class="media mt-3">
+              <img class="mr-3" src="{{ comment['snippet']['topLevelComment']['snippet']['authorProfileImageUrl'] }}">
+              <div class="media-body">
+                {% if comment['snippet']['topLevelComment']['snippet']['likeCount'] > 0 %}
+                <div class="float-right">
+                  <a href="#" class="btn btn-success disabled" role="button" aria-disabled="true">
+                    Likes <span class="badge badge-light">{{ comment['snippet']['topLevelComment']['snippet']['likeCount'] }}</span>
+                  </a>
+                </div>
+                {% endif %}
+                <h5 class="mt-0" data-channel-id="{{ comment['snippet']['topLevelComment']['snippet']['authorChannelId']['value'] }}"><a href="{{ comment['snippet']['topLevelComment']['snippet']['authorChannelUrl'] }}">{{ comment['snippet']['topLevelComment']['snippet']['authorDisplayName'] }}</a></h5>
+                <h6 class="text-muted" title="Last modified: {{ comment['snippet']['topLevelComment']['snippet']['updatedAt'] }}">{{ comment['snippet']['topLevelComment']['snippet']['publishedAt'] }}</h6>
+                {{ comment['snippet']['topLevelComment']['snippet']['textDisplay'] | safe }}
+
+                {% for reply in comment['replies']['comments'] %}
+                <div class="media mt-3">
+                  <a class="pr-3" href="#">
+                    <img src="{{ reply['snippet']['authorProfileImageUrl'] }}">
+                  </a>
+                  <div class="media-body">
+                    {% if reply['snippet']['likeCount'] > 0 %}
+                    <div class="float-right">
+                      <a href="#" class="btn btn-success disabled" role="button" aria-disabled="true">
+                        Likes <span class="badge badge-light">{{ reply['snippet']['likeCount'] }}</span>
+                      </a>
+                    </div>
+                    {% endif %}
+                    <h5 class="mt-0" data-channel-id="{{ reply['snippet']['authorChannelId']['value'] }}"><a href="{{ reply['snippet']['authorChannelUrl'] }}">{{ reply['snippet']['authorDisplayName'] }}</a></h5>
+                    <h6 class="text-muted" title="Last modified: {{ reply['snippet']['updatedAt'] }}">{{ reply['snippet']['publishedAt'] }}</h6>
+                    {{ reply['snippet']['textDisplay'] | safe }}
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endfor %}
           </div>
           {% else %}
           <!--- TODO -->
