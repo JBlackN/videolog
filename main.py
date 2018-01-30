@@ -27,7 +27,8 @@ def index():
 
 @app.route('/videos')
 @app.route('/videos/<channel>')
-def videos(user = None, tracks = [], channel = None):
+@app.route('/videos/<channel>/<video>')
+def videos(user = None, tracks = [], subs = [], channel = None, video = None):
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
 
@@ -36,10 +37,16 @@ def videos(user = None, tracks = [], channel = None):
     if channel is None and tracks:
         return flask.redirect(flask.url_for('videos', channel = tracks[0]['id']))
     else:
-        return flask.render_template('index.html', user = flask.session['user'],
-            tracks = tracks, channel = channel,
-            videos = yt_get_channel_videos(channel)
-        )
+        if video is None:
+            return flask.render_template('index.html', user = flask.session['user'],
+                tracks = tracks, channel = channel,
+                videos = yt_get_channel_videos(channel)
+            )
+        else:
+            return flask.render_template('index.html', user = flask.session['user'],
+                tracks = tracks, subs = yt_get_subscriptions(list_only = True),
+                channel = channel, video = yt_get_video(video, channel)
+            )
 
 @app.route('/channels')
 def channels(user = None, subs = None, tracks = [], tracking = False, error = False):
@@ -265,6 +272,82 @@ def yt_get_channel_videos(channel_id):
             return items
         else:
             kwargs['pageToken'] = response['nextPageToken']
+
+def yt_get_video(video_id, channel_id):
+    db = get_db()
+    client = yt_get_client()
+    response = client.videos().list(
+        part = 'snippet,contentDetails,statistics,status', id = video_id
+    ).execute()
+
+    video = response['items'][0]
+
+    if video['id'] in db[flask.session['user']['id']][channel_id]['played']:
+        video['played'] = db[flask.session['user']['id']][channel_id]['played'][video['id']]
+    else:
+        video['played'] = None
+
+    if video['id'] in db[flask.session['user']['id']][channel_id]['archived']:
+        video['archived'] = db[flask.session['user']['id']][channel_id]['archived'][video['id']]
+    else:
+        video['archived'] = None
+
+    response2 = client.videos().getRating(
+        id = video_id
+    ).execute()
+    video['rating'] = response2['items'][0]['rating']
+
+    video['playlists'] = {}
+    for playlist_id, data in yt_get_playlists().items():
+        video['playlists'][playlist_id] = {}
+        video['playlists'][playlist_id]['title'] = data['title']
+        if video['id'] in data['videos']:
+            video['playlists'][playlist_id]['included'] = True
+        else:
+            video['playlists'][playlist_id]['included'] = False
+
+    return video
+
+def yt_get_playlists():
+    client = yt_get_client()
+    kwargs = {
+        'part': 'snippet', 'mine': True, 'maxResults': 50
+    }
+    playlists = {}
+
+    while True:
+        response = client.playlists().list(**kwargs).execute()
+
+        for playlist in response['items']:
+            playlists[playlist['id']] = {
+                'title': playlist['snippet']['title'], 'videos': []
+            }
+
+        if 'nextPageToken' not in response:
+            break
+        else:
+            kwargs['pageToken'] = response['nextPageToken']
+
+    for playlist_id in playlists.keys():
+        kwargs2 = {
+            'part': 'contentDetails', 'playlistId': playlist_id,
+            'maxResults': 50
+        }
+        videos = []
+
+        while True:
+            response2 = client.playlistItems().list(**kwargs2).execute()
+
+            for video in response2['items']:
+                videos.append(video['contentDetails']['videoId'])
+
+            if 'nextPageToken' not in response:
+                playlists[playlist_id]['videos'] = videos
+                break
+            else:
+                kwargs['pageToken'] = response['nextPageToken']
+
+    return playlists
 
 def yt_get_client():
     credentials = google.oauth2.credentials.Credentials(

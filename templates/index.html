@@ -23,11 +23,12 @@
       </div>
     </div>
     <div class="col-lg-9">
+      {% if videos %}
       <div class="container-fluid">
         <div class="row">
           {% for video in videos %}
           <div class="col-md-6 col-lg-3">
-            <div class="video card mb-3">
+            <div id="{{ video['id']['videoId'] }}" class="video card mb-3" data-channel-id="{{ video['snippet']['channelId'] }}">
               <img class="card-img-top" src="{{ video['snippet']['thumbnails']['high']['url'] }}">
               <div class="card-body">
                 <h6 class="card-title">{{ video['snippet']['title'] }}</h6>
@@ -50,6 +51,122 @@
           {% endfor %}
         </div>
       </div>
+      {% elif video %}
+      <div class="container-fluid">
+        <div class="row">
+          {% if video['status']['embeddable'] %}
+          <div class="col-12">
+            <div class="embed-responsive embed-responsive-16by9">
+              <div id="player"></div>
+            </div>
+            <script>
+              var tag = document.createElement('script');
+              tag.src = 'https://www.youtube.com/iframe_api';
+
+              var firstScriptTag = document.getElementsByTagName('script')[0];
+              firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+              var player;
+              function onYouTubeIframeAPIReady() {
+                player = new YT.Player('player', {
+                  videoId: '{{ video['id'] }}',
+                  events: {
+                  }
+                });
+              }
+            </script>
+          </div>
+          <div class="col-lg-7 mt-3">
+            <h2>{{ video['snippet']['title'] }}</h2>
+          </div>
+          <div class="col-lg-5 text-right mt-3">
+            {% if video['played'] is not none %}
+            <a class="btn btn-outline-danger" href="#" role="button">Mark as unplayed</a>
+            {% else %}
+            <a class="btn btn-outline-success" href="#" role="button">Mark as played</a>
+            {% endif %}
+            {% if video['archived'] is not none %}
+            <a class="btn btn-outline-warning" href="#" role="button">Unarchive</a>
+            {% else %}
+            <a class="btn btn-outline-info" href="#" role="button">Archive</a>
+            {% endif %}
+            <div class="dropdown show d-inline-block">
+              <a class="btn btn-outline-{% if video['rating'] == 'like' %}success{% elif video['rating'] == 'dislike' %}danger{% else %}warning{% endif %} dropdown-toggle" href="#" role="button" id="video-rating" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                {% if video['rating'] == 'like' %}Liked{% elif video['rating'] == 'dislike' %}Disliked{% else %}Unrated{% endif %}
+              </a>
+
+              <div class="dropdown-menu" aria-labelledby="video-rating">
+                {% if video['rating'] == 'like' %}
+                <a class="dropdown-item" href="#">Dislike</a>
+                <a class="dropdown-item" href="#">Unrate</a>
+                {% elif video['rating'] == 'dislike' %}
+                <a class="dropdown-item" href="#">Like</a>
+                <a class="dropdown-item" href="#">Unrate</a>
+                {% else %}
+                <a class="dropdown-item" href="#">Like</a>
+                <a class="dropdown-item" href="#">Dislike</a>
+                {% endif %}
+              </div>
+            </div>
+            <div class="dropdown show d-inline-block">
+              <a class="btn btn-outline-dark dropdown-toggle" href="#" role="button" id="video-playlists" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Playlists
+              </a>
+
+              <div class="dropdown-menu" aria-labelledby="video-playlists">
+                <form class="px-4 py-3">
+                  <a class="btn btn-outline-primary mb-3" href="#" role="button">Update playlists</a>
+                  {% for playlist_id, data in video['playlists'].items() %}
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="{{ playlist_id }}" {% if data['included'] %}checked{% endif %}>
+                    <label class="form-check-label" for="{{ playlist_id }}">
+                      {{ data['title'] }}
+                    </label>
+                  </div>
+                  {% endfor %}
+                </form>
+              </div>
+            </div>
+            {% if channel in subs %}
+            <a class="btn btn-outline-danger" href="#" role="button">Unsubscribe</a>
+            {% else %}
+            <a class="btn btn-outline-success" href="#" role="button">Subscribe</a>
+            {% endif %}
+          </div>
+          <div class="col-12">
+            <h6 class="text-muted">{{ video['snippet']['publishedAt'] }}</h6>
+            <pre class="pre-scrollable mt-3 video-description">{{ video['snippet']['description'] }}</pre>
+            {% for tag in video['snippet']['tags'] %}
+            <span class="badge badge-dark">{{ tag }}</span>
+            {% endfor %}
+          </div>
+          <div class="col-12 mt-3">
+            <a href="#" class="btn btn-info disabled" role="button" aria-disabled="true">
+              Views <span class="badge badge-light">{{ video['statistics']['viewCount'] }}</span>
+            </a>
+            <a href="#" class="btn btn-success disabled" role="button" aria-disabled="true">
+              Likes <span class="badge badge-light">{{ video['statistics']['likeCount'] }}</span>
+            </a>
+            <a href="#" class="btn btn-danger disabled" role="button" aria-disabled="true">
+              Dislikes <span class="badge badge-light">{{ video['statistics']['dislikeCount'] }}</span>
+            </a>
+            <a href="#" class="btn btn-dark disabled" role="button" aria-disabled="true">
+              Favorites <span class="badge badge-light">{{ video['statistics']['favoriteCount'] }}</span>
+            </a>
+            <a href="#" class="btn btn-warning disabled" role="button" aria-disabled="true">
+              Comments <span class="badge badge-light">{{ video['statistics']['commentCount'] }}</span>
+            </a>
+          </div>
+          <div class="col-12 mt-3">
+            <h3>Comments</h3>
+          </div>
+          {% else %}
+          <!--- TODO -->
+          {% endif %}
+        </div>
+      </div>
+      {% else %}
+      {% endif %}
     </div>
     {% else %}
     <div class="col-12">
@@ -67,13 +184,17 @@
     $(document).ready(function() {
       $('#menu-videos').addClass('active');
 
+      $('.video').click(function() {
+        window.location = window.location.origin + '/videos/' + $(this).data('channelId') + '/' + $(this).attr('id');
+      });
+
       $('.video').hover(
         function() { $(this).addClass('border'); $(this).addClass('border-primary'); },
         function() { $(this).removeClass('border'); $(this).removeClass('border-primary'); }
       );
 
       $('input[name="options"]').change(function() {
-        window.location = '../videos/' + $(this).attr('id');
+        window.location = window.location.origin + '/videos/' + $(this).attr('id');
       });
     });
   </script>
