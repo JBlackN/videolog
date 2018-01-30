@@ -71,8 +71,19 @@
                 player = new YT.Player('player', {
                   videoId: '{{ video['id'] }}',
                   events: {
+                    'onStateChange': onPlayerStateChange
                   }
                 });
+              }
+
+              var done = false;
+              function onPlayerStateChange(event) {
+                if (event.data == YT.PlayerState.ENDED && !done) {
+                  if ($('#videos-mark-played').length) {
+                    $('#videos-mark-played').trigger('click');
+                  }
+                  done = true;
+                }
               }
             </script>
           </div>
