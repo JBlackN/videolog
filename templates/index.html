@@ -191,7 +191,7 @@
                   </a>
                 </div>
                 {% endif %}
-                <h5 class="mt-0" data-channel-id="{{ comment['snippet']['topLevelComment']['snippet']['authorChannelId']['value'] }}"><a href="{{ comment['snippet']['topLevelComment']['snippet']['authorChannelUrl'] }}">{{ comment['snippet']['topLevelComment']['snippet']['authorDisplayName'] }}</a></h5>
+                <h5 class="mt-0" data-channel-id="{% if 'authorChannelId' in comment['snippet']['topLevelComment']['snippet'] %}{{ comment['snippet']['topLevelComment']['snippet']['authorChannelId']['value'] }}{% else %}null{% endif %}"><a href="{{ comment['snippet']['topLevelComment']['snippet']['authorChannelUrl'] }}">{{ comment['snippet']['topLevelComment']['snippet']['authorDisplayName'] }}</a></h5>
                 <h6 class="text-muted" title="Last modified: {{ comment['snippet']['topLevelComment']['snippet']['updatedAt'] }}">{{ comment['snippet']['topLevelComment']['snippet']['publishedAt'] }}</h6>
                 {{ comment['snippet']['topLevelComment']['snippet']['textDisplay'] | safe }}
 
@@ -208,7 +208,7 @@
                       </a>
                     </div>
                     {% endif %}
-                    <h5 class="mt-0" data-channel-id="{{ reply['snippet']['authorChannelId']['value'] }}"><a href="{{ reply['snippet']['authorChannelUrl'] }}">{{ reply['snippet']['authorDisplayName'] }}</a></h5>
+                    <h5 class="mt-0" data-channel-id="{% if 'authorChannelId' in reply['snippet'] %}{{ reply['snippet']['authorChannelId']['value'] }}{% else %}null{% endif %}"><a href="{{ reply['snippet']['authorChannelUrl'] }}">{{ reply['snippet']['authorDisplayName'] }}</a></h5>
                     <h6 class="text-muted" title="Last modified: {{ reply['snippet']['updatedAt'] }}">{{ reply['snippet']['publishedAt'] }}</h6>
                     {{ reply['snippet']['textDisplay'] | safe }}
                   </div>
