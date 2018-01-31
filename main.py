@@ -429,23 +429,27 @@ def yt_get_tracks(sort_by_played = False):
 def yt_get_channel_videos(channel_id):
     db = get_db()
     client = yt_get_client()
+    uploaded_id = client.channels().list(
+        part = 'contentDetails', id = channel_id
+    ).execute()['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+
     kwargs = {
-        'part': 'snippet', 'channelId': channel_id,
-        'order': 'date', 'maxResults': 50, 'type': 'video'
+        'part': 'snippet', 'playlistId': uploaded_id,
+        'maxResults': 50
     }
     items = []
 
     while True:
-        response = client.search().list(**kwargs).execute()
+        response = client.playlistItems().list(**kwargs).execute()
 
         for item in response['items']:
-            if item['id']['videoId'] in db[flask.session['user']['id']][channel_id]['played']:
-                item['played'] = db[flask.session['user']['id']][channel_id]['played'][item['id']['videoId']]
+            if item['snippet']['resourceId']['videoId'] in db[flask.session['user']['id']][channel_id]['played']:
+                item['played'] = db[flask.session['user']['id']][channel_id]['played'][item['snippet']['resourceId']['videoId']]
             else:
                 item['played'] = None
 
-            if item['id']['videoId'] in db[flask.session['user']['id']][channel_id]['archived']:
-                item['archived'] = db[flask.session['user']['id']][channel_id]['archived'][item['id']['videoId']]
+            if item['snippet']['resourceId']['videoId'] in db[flask.session['user']['id']][channel_id]['archived']:
+                item['archived'] = db[flask.session['user']['id']][channel_id]['archived'][item['snippet']['resourceId']['videoId']]
             else:
                 item['archived'] = None
 
