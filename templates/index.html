@@ -117,7 +117,12 @@
               function onPlayerStateChange(event) {
                 if (event.data == YT.PlayerState.ENDED && !done) {
                   if ($('#videos-mark-played').length) {
-                    $('#videos-mark-played').trigger('click');
+                    url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/play';
+                    $.get(url, function(result) {
+                      if (result) {
+                        window.location = window.location.origin + '/videos/{{ channel }}';
+                      }
+                    });
                   }
                   done = true;
                 }
