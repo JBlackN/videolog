@@ -1,6 +1,7 @@
 import datetime
 import json
 import os
+import random
 import re
 import time
 import urllib
@@ -43,6 +44,65 @@ def videos(user = None, tracks = [], subs = [], channel = None, video = None):
             return flask.render_template('index.html', user = flask.session['user'],
                 tracks = tracks, channel = channel,
                 videos = yt_get_channel_videos(channel)
+            )
+        elif video == 'random-unplayed':
+            try:
+                choice = random.choice([
+                    video['snippet']['resourceId']['videoId']
+                    for video in yt_get_channel_videos(channel)
+                    if video['played'] is None
+                ])
+            except IndexError:
+                return flask.redirect(flask.url_for('videos',
+                    channel = channel
+                ))
+
+            return flask.redirect(flask.url_for('videos',
+                channel = channel, video = choice
+            ))
+        elif video == 'next-unplayed':
+            try:
+                choice = sorted([
+                    video
+                    for video in yt_get_channel_videos(channel)
+                    if video['played'] is None
+                ], key = lambda video: video['snippet']['publishedAt'])[0]
+            except IndexError:
+                return flask.redirect(flask.url_for('videos',
+                    channel = channel
+                ))
+
+            return flask.redirect(flask.url_for('videos',
+                channel = channel, video = choice['snippet']['resourceId']['videoId']
+            ))
+        elif video == 'random-archived':
+            try:
+                choice = random.choice([
+                    video['snippet']['resourceId']['videoId']
+                    for video in yt_get_channel_videos(channel)
+                    if video['archived'] is not None
+                ])
+            except IndexError:
+                return flask.redirect(flask.url_for('videos',
+                    channel = channel
+                ))
+
+            return flask.redirect(flask.url_for('videos',
+                channel = channel, video = choice)
+            )
+        elif video == 'random-all':
+            try:
+                choice = random.choice([
+                    video['snippet']['resourceId']['videoId']
+                    for video in yt_get_channel_videos(channel)
+                ])
+            except IndexError:
+                return flask.redirect(flask.url_for('videos',
+                    channel = channel
+                ))
+
+            return flask.redirect(flask.url_for('videos',
+                channel = channel, video = choice)
             )
         else:
             return flask.render_template('index.html', user = flask.session['user'],

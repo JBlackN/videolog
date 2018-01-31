@@ -289,6 +289,22 @@
         window.location = window.location.origin + '/videos/' + $(this).attr('id');
       });
 
+      $('#videos-random-unplayed').click(function() {
+        window.location = window.location.origin + '/videos/{{ channel }}/' + 'random-unplayed'
+      });
+
+      $('#videos-next-unplayed').click(function() {
+        window.location = window.location.origin + '/videos/{{ channel }}/' + 'next-unplayed'
+      });
+
+      $('#videos-random-archived').click(function() {
+        window.location = window.location.origin + '/videos/{{ channel }}/' + 'random-archived'
+      });
+
+      $('#videos-random-all').click(function() {
+        window.location = window.location.origin + '/videos/{{ channel }}/' + 'random-all'
+      });
+
       {% if video %}
       $('#videos-mark-played').click(function() {
         url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/play';
