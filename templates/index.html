@@ -25,6 +25,43 @@
     <div class="col-lg-9">
       {% if videos %}
       <div class="container-fluid">
+        <div class="row mb-3">
+          <div class="col-12 text-center">
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+              <label class="btn btn-outline-warning">
+                <input type="radio" name="videos-toggle-archived" id="videos-unarchived" autocomplete="off"> Unarchived
+              </label>
+              <label class="btn btn-outline-dark active">
+                <input type="radio" name="videos-toggle-archived" id="videos-archived-all" autocomplete="off" checked> All
+              </label>
+              <label class="btn btn-outline-info">
+                <input type="radio" name="videos-toggle-archived" id="videos-archived" autocomplete="off"> Archived
+              </label>
+            </div>
+            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+              <label class="btn btn-outline-danger">
+                <input type="radio" name="videos-toggle-played" id="videos-unplayed" autocomplete="off"> Unplayed
+              </label>
+              <label class="btn btn-outline-dark active">
+                <input type="radio" name="videos-toggle-played" id="videos-played-all" autocomplete="off" checked> All
+              </label>
+              <label class="btn btn-outline-success">
+                <input type="radio" name="videos-toggle-played" id="videos-played" autocomplete="off"> Played
+              </label>
+            </div>
+            <div class="btn-group">
+              <button id="videos-random-unplayed" type="button" class="btn btn-outline-primary">Play random (unplayed)</button>
+              <button type="button" class="btn btn-outline-primary dropdown-toggle dropdown-toggle-split" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <span class="sr-only">Toggle Dropdown</span>
+              </button>
+              <div class="dropdown-menu">
+                <a id="videos-next-unplayed" class="dropdown-item" href="#">Play next (unplayed)</a>
+                <a id="videos-random-archived" class="dropdown-item" href="#">Play random (archived)</a>
+                <a id="videos-random-all" class="dropdown-item" href="#">Play random (all)</a>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="row">
           {% for video in videos %}
           <div class="col-md-6 col-lg-3">
