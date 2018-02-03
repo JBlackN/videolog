@@ -6,6 +6,12 @@
     {% if tracks %}
     <div class="col-lg-3">
       <div class="btn-group-vertical btn-group-toggle" data-toggle="buttons">
+        {% if videos is defined %}
+        <label class="btn btn-outline-dark {% if channel == 'all' %}active{% endif %}">
+          <input type="radio" name="options" id="all" autocomplete="off" {% if channel == 'all' %}checked{% endif %}>
+          All
+        </label>
+        {% endif %}
         {% for item in tracks %}
         <label class="btn btn-outline-dark {% if channel == item['id'] %}active{% endif %}">
           <input type="radio" name="options" id="{{ item['id'] }}" autocomplete="off" {% if channel == item['id'] and videos %}checked{% endif %}>
@@ -66,6 +72,11 @@
           {% for video in videos %}
           <div class="col-md-6 col-lg-3">
             <div id="{{ video['snippet']['resourceId']['videoId'] }}" class="video card mb-3" data-channel-id="{{ video['snippet']['channelId'] }}">
+              {% if channel == 'all' %}
+              <div class="card-header">
+                {{ video['snippet']['channelTitle'] }}
+              </div>
+              {% endif %}
               <img class="card-img-top" src="{{ video['snippet']['thumbnails']['high']['url'] }}">
               <div class="card-body">
                 <h6 class="card-title">{{ video['snippet']['title'] }}</h6>

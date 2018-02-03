@@ -43,7 +43,18 @@ def videos(user = None, tracks = [], subs = [], channel = None, video = None):
         if video is None:
             archived = flask.request.args.get('archived', 'null')
             played = flask.request.args.get('played', 'null')
-            videos = yt_get_channel_videos(channel)
+            videos = []
+
+            if channel == 'all':
+                for tracked in tracks:
+                    videos.append(yt_get_channel_videos(tracked['id']))
+                videos = [
+                    item
+                    for sublist in videos
+                    for item in sublist
+                ]
+            else:
+                videos = yt_get_channel_videos(channel)
 
             if archived == 'true':
                 videos = [
