@@ -41,9 +41,39 @@ def videos(user = None, tracks = [], subs = [], channel = None, video = None):
         return flask.redirect(flask.url_for('videos', channel = tracks[0]['id']))
     else:
         if video is None:
+            archived = flask.request.args.get('archived', 'null')
+            played = flask.request.args.get('played', 'null')
+            videos = yt_get_channel_videos(channel)
+
+            if archived == 'true':
+                videos = [
+                    video
+                    for video in videos
+                    if video['archived'] is not None
+                ]
+            elif archived == 'false':
+                videos = [
+                    video
+                    for video in videos
+                    if video['archived'] is None
+                ]
+
+            if played == 'true':
+                videos = [
+                    video
+                    for video in videos
+                    if video['played'] is not None
+                ]
+            elif played == 'false':
+                videos = [
+                    video
+                    for video in videos
+                    if video['played'] is None
+                ]
+
             return flask.render_template('index.html', user = flask.session['user'],
                 tracks = tracks, channel = channel,
-                videos = yt_get_channel_videos(channel)
+                videos = videos, archived = archived, played = played
             )
         elif video == 'random-unplayed':
             try:

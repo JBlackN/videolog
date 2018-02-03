@@ -23,30 +23,30 @@
       </div>
     </div>
     <div class="col-lg-9">
-      {% if videos %}
+      {% if videos is defined %}
       <div class="container-fluid">
         <div class="row mb-3">
           <div class="col-12 text-center">
             <div class="btn-group btn-group-toggle" data-toggle="buttons">
-              <label class="btn btn-outline-warning">
-                <input type="radio" name="videos-toggle-archived" id="videos-unarchived" autocomplete="off"> Unarchived
+              <label class="btn btn-outline-warning {% if archived == 'false' %}active{% endif %}">
+                <input type="radio" name="videos-toggle-archived" id="videos-unarchived" autocomplete="off" {% if archived == 'false' %}checked{% endif %}> Unarchived
               </label>
-              <label class="btn btn-outline-dark active">
-                <input type="radio" name="videos-toggle-archived" id="videos-archived-all" autocomplete="off" checked> All
+              <label class="btn btn-outline-dark {% if archived == 'null' %}active{% endif %}">
+                <input type="radio" name="videos-toggle-archived" id="videos-archived-all" autocomplete="off" {% if archived == 'null' %}checked{% endif %}> All
               </label>
-              <label class="btn btn-outline-info">
-                <input type="radio" name="videos-toggle-archived" id="videos-archived" autocomplete="off"> Archived
+              <label class="btn btn-outline-info {% if archived == 'true' %}active{% endif %}">
+                <input type="radio" name="videos-toggle-archived" id="videos-archived" autocomplete="off" {% if archived == 'true' %}checked{% endif %}> Archived
               </label>
             </div>
             <div class="btn-group btn-group-toggle" data-toggle="buttons">
-              <label class="btn btn-outline-danger">
-                <input type="radio" name="videos-toggle-played" id="videos-unplayed" autocomplete="off"> Unplayed
+              <label class="btn btn-outline-danger {% if played == 'false' %}active{% endif %}">
+                <input type="radio" name="videos-toggle-played" id="videos-unplayed" autocomplete="off" {% if played == 'false' %}checked{% endif %}> Unplayed
               </label>
-              <label class="btn btn-outline-dark active">
-                <input type="radio" name="videos-toggle-played" id="videos-played-all" autocomplete="off" checked> All
+              <label class="btn btn-outline-dark {% if played == 'null' %}active{% endif %}">
+                <input type="radio" name="videos-toggle-played" id="videos-played-all" autocomplete="off" {% if played == 'null' %}checked{% endif %}> All
               </label>
-              <label class="btn btn-outline-success">
-                <input type="radio" name="videos-toggle-played" id="videos-played" autocomplete="off"> Played
+              <label class="btn btn-outline-success {% if played == 'true' %}active{% endif %}">
+                <input type="radio" name="videos-toggle-played" id="videos-played" autocomplete="off" {% if played == 'true' %}checked{% endif %}> Played
               </label>
             </div>
             <div class="btn-group">
@@ -281,6 +281,60 @@
     $(document).ready(function() {
       $('#menu-videos').addClass('active');
 
+      $('input[name="options"]').change(function() {
+        window.location = window.location.origin + '/videos/' + $(this).attr('id');
+      });
+
+      $('input[name="videos-toggle-archived"]').change(function() {
+        var archived = '';
+        var played = '{% if played != "null" %}played={{ played }}{% endif %}';
+        var query = '';
+
+        if ($(this).attr('id') == 'videos-archived') {
+          archived = 'archived=true';
+        }
+        else if ($(this).attr('id') == 'videos-unarchived') {
+          archived = 'archived=false';
+        }
+
+        if (archived != '' && played != '') {
+          query = '?' + archived + '&' + played;
+        }
+        else if (archived != '') {
+          query = '?' + archived;
+        }
+        else if (played != '') {
+          query = '?' + played;
+        }
+
+        window.location = window.location.origin + '/videos/{{ channel }}' + query;
+      });
+
+      $('input[name="videos-toggle-played"]').change(function() {
+        var played = '';
+        var archived = '{% if archived != "null" %}archived={{ archived }}{% endif %}';
+        var query = '';
+
+        if ($(this).attr('id') == 'videos-played') {
+          played = 'played=true';
+        }
+        else if ($(this).attr('id') == 'videos-unplayed') {
+          played = 'played=false';
+        }
+
+        if (archived != '' && played != '') {
+          query = '?' + archived + '&' + played;
+        }
+        else if (archived != '') {
+          query = '?' + archived;
+        }
+        else if (played != '') {
+          query = '?' + played;
+        }
+
+        window.location = window.location.origin + '/videos/{{ channel }}' + query;
+      });
+
       $('.video').click(function() {
         window.location = window.location.origin + '/videos/' + $(this).data('channelId') + '/' + $(this).attr('id');
       });
@@ -289,10 +343,6 @@
         function() { $(this).addClass('border'); $(this).addClass('border-primary'); },
         function() { $(this).removeClass('border'); $(this).removeClass('border-primary'); }
       );
-
-      $('input[name="options"]').change(function() {
-        window.location = window.location.origin + '/videos/' + $(this).attr('id');
-      });
 
       $('#videos-random-unplayed').click(function() {
         window.location = window.location.origin + '/videos/{{ channel }}/' + 'random-unplayed'
