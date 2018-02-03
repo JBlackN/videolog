@@ -14,7 +14,7 @@
             <div class="media-body">
               <h5 class="mt-3">{{ item['snippet']['title'] }}</h5>
               <div class="progress">
-                <div class="progress-bar bg-info" role="progressbar" style="width: {{ item['statistics']['playedPercentage'] }}%" aria-valuenow="{{ item['statistics']['playedPercentage'] }}" aria-valuemin="0" aria-valuemax="100">{{ '%.2f' % item['statistics']['playedPercentage'] }}%</div>
+                <div class="progress-bar bg-info" role="progressbar" style="width: {{ item['statistics']['playedPercentage'] }}%" aria-valuenow="{{ item['statistics']['playedPercentage'] }}" aria-valuemin="0" aria-valuemax="100">{{ item['statistics']['playedCount'] }}/{{ item['statistics']['videoCount'] }} ({{ '%.2f' % item['statistics']['playedPercentage'] }}%)</div>
               </div>
             </div>
           </div>
