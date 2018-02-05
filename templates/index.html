@@ -373,37 +373,73 @@
 
       {% if video %}
       $('#videos-mark-played').click(function() {
+        $('#videos-mark-played').addClass('disabled');
+        $('#videos-mark-played').prop('aria-disabled', true);
+        $('#videos-mark-played').append(' <i class="fas fa-spinner fa-spin"></i>');
+
         url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/play';
         $.get(url, function(result) {
           if (result) {
             window.location.reload(true);
           }
+          else {
+            $('#videos-mark-played').removeClass('disabled');
+            $('#videos-mark-played').prop('aria-disabled', false);
+            $('#videos-mark-played i').remove();
+          }
         });
       });
 
       $('#videos-mark-unplayed').click(function() {
+        $('#videos-mark-unplayed').addClass('disabled');
+        $('#videos-mark-unplayed').prop('aria-disabled', true);
+        $('#videos-mark-unplayed').append(' <i class="fas fa-spinner fa-spin"></i>');
+
         url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/unplay';
         $.get(url, function(result) {
           if (result) {
             window.location.reload(true);
           }
+          else {
+            $('#videos-mark-unplayed').removeClass('disabled');
+            $('#videos-mark-unplayed').prop('aria-disabled', false);
+            $('#videos-mark-unplayed i').remove();
+          }
         });
       });
 
       $('#videos-archive').click(function() {
+        $('#videos-archive').addClass('disabled');
+        $('#videos-archive').prop('aria-disabled', true);
+        $('#videos-archive').append(' <i class="fas fa-spinner fa-spin"></i>');
+
         url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/archive';
         $.get(url, function(result) {
           if (result) {
             window.location.reload(true);
           }
+          else {
+            $('#videos-archive').removeClass('disabled');
+            $('#videos-archive').prop('aria-disabled', false);
+            $('#videos-archive i').remove();
+          }
         });
       });
 
       $('#videos-unarchive').click(function() {
+        $('#videos-unarchive').addClass('disabled');
+        $('#videos-unarchive').prop('aria-disabled', true);
+        $('#videos-unarchive').append(' <i class="fas fa-spinner fa-spin"></i>');
+
         url = window.location.origin + '/api/videos/{{ channel }}/{{ video['id'] }}/unarchive';
         $.get(url, function(result) {
           if (result) {
             window.location.reload(true);
+          }
+          else {
+            $('#videos-unarchive').removeClass('disabled');
+            $('#videos-unarchive').prop('aria-disabled', false);
+            $('#videos-unarchive i').remove();
           }
         });
       });
@@ -420,6 +456,11 @@
               window.location.reload(true);
             });
           }
+          else {
+            $('#video-rating').removeClass('disabled');
+            $('#video-rating').prop('aria-disabled', false);
+            $('#video-rating i').remove();
+          }
         });
       });
 
@@ -435,6 +476,11 @@
               window.location.reload(true);
             });
           }
+          else {
+            $('#video-rating').removeClass('disabled');
+            $('#video-rating').prop('aria-disabled', false);
+            $('#video-rating i').remove();
+          }
         });
       });
 
@@ -449,6 +495,11 @@
             (function(ms) { return new Promise(resolve => setTimeout(resolve, ms)); })(10000).then(() => {
               window.location.reload(true);
             });
+          }
+          else {
+            $('#video-rating').removeClass('disabled');
+            $('#video-rating').prop('aria-disabled', false);
+            $('#video-rating i').remove();
           }
         });
       });
@@ -477,6 +528,11 @@
               window.location.reload(true);
             });
           }
+          else {
+            $('#video-playlists-update').removeClass('disabled');
+            $('#video-playlists-update').prop('aria-disabled', false);
+            $('#video-playlists-update i').remove();
+          }
         });
       });
 
@@ -492,6 +548,11 @@
               window.location.reload(true);
             });
           }
+          else {
+            $('#videos-subscribe').removeClass('disabled');
+            $('#videos-subscribe').prop('aria-disabled', false);
+            $('#videos-subscribe i').remove();
+          }
         });
       });
 
@@ -506,6 +567,11 @@
             (function(ms) { return new Promise(resolve => setTimeout(resolve, ms)); })(10000).then(() => {
               window.location.reload(true);
             });
+          }
+          else {
+            $('#videos-unsubscribe').removeClass('disabled');
+            $('#videos-unsubscribe').prop('aria-disabled', false);
+            $('#videos-unsubscribe i').remove();
           }
         });
       });
