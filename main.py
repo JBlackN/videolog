@@ -25,6 +25,8 @@ def index():
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
 
+    db_update_archives()
+
     return flask.redirect('videos')
 
 
@@ -148,7 +150,7 @@ def videos(user = None, tracks = [], subs = [], channel = None, video = None):
         else:
             return flask.render_template('index.html', user = flask.session['user'],
                 tracks = tracks, subs = yt_get_subscriptions(list_only = True),
-                channel = channel, video = yt_get_video(video, channel)
+                channel = channel, video = yt_get_video(video)
             )
 
 @app.route('/channels')
@@ -301,10 +303,21 @@ def video_archive(channel = None, video = None):
 
     if channel is not None and video is not None:
         db = get_db()
-        db[flask.session['user']['id']][channel]['archived'][video] = datetime.datetime.utcnow().replace(microsecond = 0, tzinfo = datetime.timezone.utc).isoformat();
-        update_db(db)
+        archive = None
+        for playlist in db_get_archives():
+            if playlist['contentDetails']['itemCount'] < 5000:
+                archive = playlist
+                break
 
-        return flask.jsonify(True)
+        if archive is None:
+            archive = yt_create_archive()
+
+        if yt_insert_to_playlist(video, archive['id']):
+            db[flask.session['user']['id']][channel]['archived'][video] = archive['id']
+            update_db(db)
+            return flask.jsonify(True)
+        else:
+            return flask.jsonify(False)
 
 @app.route('/api/videos/<channel>/<video>/unarchive')
 def video_unarchive(channel = None, video = None):
@@ -314,8 +327,11 @@ def video_unarchive(channel = None, video = None):
     if channel is not None and video is not None:
         db = get_db()
         if video in db[flask.session['user']['id']][channel]['archived']:
-            db[flask.session['user']['id']][channel]['archived'].pop(video)
-            update_db(db)
+            if yt_remove_from_playlist(video, db[flask.session['user']['id']][channel]['archived'][video]):
+                db[flask.session['user']['id']][channel]['archived'].pop(video)
+                update_db(db)
+            else:
+                return flask.jsonify(False)
 
         return flask.jsonify(True)
 
@@ -357,7 +373,6 @@ def video_playlists(channel = None, video = None):
                     'part': 'snippet', 'maxResults': 50,
                     'playlistId': playlist_id
                 }
-                items = []
 
                 while True:
                     response = client.playlistItems().list(**kwargs).execute()
@@ -458,6 +473,52 @@ def update_db(db):
 def db_get_channels():
     db = get_db()
     return list(db[flask.session['user']['id']].keys())
+
+def db_get_archives():
+    db = get_db()
+    archive_ids = set()
+    archives = []
+
+    for channel in db[flask.session['user']['id']].values():
+        archive_ids.update(channel['archived'].values())
+
+    for archive_id in archive_ids:
+        archives.append(yt_get_archive(archive_id))
+
+    if archives:
+        return sorted(archives,
+            key = lambda archive: archive['snippet']['publishedAt']
+        )
+    else:
+        return archives
+
+def db_update_archives():
+    db = get_db()
+    archived_video_ids = []
+    unarchive_videos = []
+
+    for archive in db_get_archives():
+        for video in yt_get_playlist_items(archive['id']):
+            video = yt_get_video(video['snippet']['resourceId']['videoId'])
+            archived_video_ids.append(video['id'])
+
+            if video['snippet']['channelId'] not in db[flask.session['user']['id']]:
+                db[flask.session['user']['id']][video['snippet']['channelId']] = {
+                    'played': {}, 'archived': {}
+                }
+
+            if video['id'] not in db[flask.session['user']['id']][video['snippet']['channelId']]['archived']:
+                db[flask.session['user']['id']][video['snippet']['channelId']]['archived'][video['id']] = archive['id']
+
+    for channel_id, channel in db[flask.session['user']['id']].items():
+        for video_id in channel['archived'].keys():
+            if video_id not in archived_video_ids:
+                unarchive_videos.append((channel_id, video_id))
+
+    for item in unarchive_videos:
+        db[flask.session['user']['id']][item[0]]['archived'].pop(item[1])
+
+    update_db(db)
 
 def yt_get_user():
     client = yt_get_client()
@@ -561,7 +622,7 @@ def yt_get_channel_videos(channel_id):
         else:
             kwargs['pageToken'] = response['nextPageToken']
 
-def yt_get_video(video_id, channel_id):
+def yt_get_video(video_id):
     db = get_db()
     client = yt_get_client()
     response = client.videos().list(
@@ -569,15 +630,22 @@ def yt_get_video(video_id, channel_id):
     ).execute()
 
     video = response['items'][0]
+    channel_id = video['snippet']['channelId']
 
-    if video['id'] in db[flask.session['user']['id']][channel_id]['played']:
-        video['played'] = db[flask.session['user']['id']][channel_id]['played'][video['id']]
-    else:
+    try:
+        if video['id'] in db[flask.session['user']['id']][channel_id]['played']:
+            video['played'] = db[flask.session['user']['id']][channel_id]['played'][video['id']]
+        else:
+            video['played'] = None
+    except KeyError:
         video['played'] = None
 
-    if video['id'] in db[flask.session['user']['id']][channel_id]['archived']:
-        video['archived'] = db[flask.session['user']['id']][channel_id]['archived'][video['id']]
-    else:
+    try:
+        if video['id'] in db[flask.session['user']['id']][channel_id]['archived']:
+            video['archived'] = db[flask.session['user']['id']][channel_id]['archived'][video['id']]
+        else:
+            video['archived'] = None
+    except KeyError:
         video['archived'] = None
 
     response2 = client.videos().getRating(
@@ -686,6 +754,76 @@ def yt_get_comments(video_id):
         return []
 
     return threads
+
+def yt_get_archive(playlist_id):
+    client = yt_get_client()
+    response = client.playlists().list(
+        part = 'snippet,contentDetails', id = playlist_id, maxResults = 50
+    ).execute()
+
+    return response['items'][0]
+
+def yt_create_archive():
+    return yt_get_client().playlists().insert(
+        body = build_resource({
+            'snippet.title': flask.session['user']['name'] + '\'s Archive #' + str(len(db_get_archives()) + 1),
+            'status.privacyStatus': 'private'
+        }),
+        part = 'snippet,status'
+    ).execute()
+
+def yt_insert_to_playlist(video_id, playlist_id):
+    try:
+        yt_get_client().playlistItems().insert(
+            body = build_resource({
+                'snippet.playlistId': playlist_id,
+                'snippet.resourceId.kind': 'youtube#video',
+                'snippet.resourceId.videoId': video_id
+            }),
+            part = 'snippet'
+        ).execute()
+    except:
+        return False
+
+    return True
+
+def yt_remove_from_playlist(video_id, playlist_id):
+    client =  yt_get_client()
+    kwargs = {
+        'part': 'snippet', 'maxResults': 50,
+        'playlistId': playlist_id
+    }
+
+    while True:
+        response = client.playlistItems().list(**kwargs).execute()
+
+        for item in response['items']:
+            if item['snippet']['resourceId']['videoId'] == video_id:
+                client.playlistItems().delete(id = item['id']).execute()
+                return True
+
+        if 'nextPageToken' not in response:
+            return False
+        else:
+            kwargs['pageToken'] = response['nextPageToken']
+
+def yt_get_playlist_items(playlist_id):
+    kwargs = {
+        'part': 'snippet', 'maxResults': 50,
+        'playlistId': playlist_id
+    }
+    items = []
+
+    while True:
+        response = yt_get_client().playlistItems().list(**kwargs).execute()
+
+        for item in response['items']:
+            items.append(item)
+
+        if 'nextPageToken' not in response:
+            return items
+        else:
+            kwargs['pageToken'] = response['nextPageToken']
 
 def yt_get_client():
     credentials = google.oauth2.credentials.Credentials(
