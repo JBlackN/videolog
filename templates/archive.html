@@ -8,15 +8,15 @@
         <div class="col-12 mt-3">
           <h3 class="mb-3">Archive video or playlist</h3>
           <div class="input-group">
-            <input type="text" class="form-control">
+            <input id="archive-input" type="text" class="form-control">
             <div class="input-group-append">
               <button class="btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Archive</button>
               <div class="dropdown-menu">
-                <a class="dropdown-item" href="#">video by URL</a>
-                <a class="dropdown-item" href="#">video by ID</a>
+                <a id="archive-vurl" class="dropdown-item" href="#">video by URL</a>
+                <a id="archive-vid" class="dropdown-item" href="#">video by ID</a>
                 <div role="separator" class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#">playlist by URL</a>
-                <a class="dropdown-item" href="#">playlist by ID</a>
+                <a id="archive-purl" class="dropdown-item" href="#">playlist by URL</a>
+                <a id="archive-pid" class="dropdown-item" href="#">playlist by ID</a>
               </div>
             </div>
           </div>
@@ -159,6 +159,36 @@
   <script type="text/javascript">
     $(document).ready(function() {
       $('#menu-archive').addClass('active');
+
+      $('#archive-vurl').click(function() {
+        var url = $('#archive-input').val();
+        var matches = url.match(/^(https?:\/\/)?(www\.)?youtube\.[a-z]{2,3}\/(watch\?v=|video\/)(.{11}).*$/);
+
+        if (matches !== null && matches.length == 5) {
+          var id = matches[4];
+          window.location = window.location.origin + '/archive/video/' + id;
+        }
+      });
+
+      $('#archive-vid').click(function() {
+        var id = $('#archive-input').val();
+        window.location = window.location.origin + '/archive/video/' + id;
+      });
+
+      $('#archive-purl').click(function() {
+        var url = $('#archive-input').val();
+        var matches = url.match(/^(https?:\/\/)?(www\.)?youtube\.[a-z]{2,3}\/playlist\?list=(.+)$/);
+
+        if (matches !== null && matches.length == 4) {
+          var id = matches[3];
+          window.location = window.location.origin + '/archive/playlist/' + id;
+        }
+      });
+
+      $('#archive-pid').click(function() {
+        var id = $('#archive-input').val();
+        window.location = window.location.origin + '/archive/playlist/' + id;
+      });
     });
   </script>
 {% endblock %}

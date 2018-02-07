@@ -280,6 +280,58 @@ def archive():
 
     return flask.render_template('archive.html', user = flask.session['user'])
 
+@app.route('/archive/<type>/<id>')
+def archive_insert(type = None, id = None):
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+
+    db = get_db()
+
+    if id is not None:
+        if type == 'video':
+            video_id = id
+            video = yt_get_video(video_id)
+
+            archive = None
+            for playlist in db_get_archives():
+                if playlist['contentDetails']['itemCount'] < 5000:
+                    archive = playlist
+                    break
+
+            if archive is None:
+                archive = yt_create_archive()
+
+            if yt_insert_to_playlist(video_id, archive['id']):
+                if video['snippet']['channelId'] not in db[flask.session['user']['id']]:
+                    db[flask.session['user']['id']][video['snippet']['channelId']] = {
+                        'played': {}, 'archived': {}
+                    }
+                db[flask.session['user']['id']][video['snippet']['channelId']]['archived'][video_id] = archive['id']
+                update_db(db)
+        elif type == 'playlist':
+            for item in yt_get_playlist_items(id):
+                video_id = item['snippet']['resourceId']['videoId']
+                video = yt_get_video(video_id)
+
+                archive = None
+                for playlist in db_get_archives():
+                    if playlist['contentDetails']['itemCount'] < 5000:
+                        archive = playlist
+                        break
+
+                if archive is None:
+                    archive = yt_create_archive()
+
+                if yt_insert_to_playlist(video_id, archive['id']):
+                    if video['snippet']['channelId'] not in db[flask.session['user']['id']]:
+                        db[flask.session['user']['id']][video['snippet']['channelId']] = {
+                            'played': {}, 'archived': {}
+                        }
+                    db[flask.session['user']['id']][video['snippet']['channelId']]['archived'][video_id] = archive['id']
+                    update_db(db)
+
+    return flask.redirect(flask.url_for('archive'))
+
 @app.route('/api/videos/<channel>/<video>/play')
 def video_play(channel = None, video = None):
     if 'credentials' not in flask.session:
