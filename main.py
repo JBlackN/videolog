@@ -39,8 +39,11 @@ def videos(user = None, tracks = [], subs = [], channel = None, video = None):
 
     tracks = yt_get_tracks(sort_by_played = True)
 
-    if channel is None and tracks:
-        return flask.redirect(flask.url_for('videos', channel = tracks[0]['id']))
+    if channel is None:
+        if tracks:
+            return flask.redirect(flask.url_for('videos', channel = tracks[0]['id']))
+        else:
+            return flask.render_template('index.html', user = flask.session['user'])
     else:
         if video is None:
             archived = flask.request.args.get('archived', 'null')
