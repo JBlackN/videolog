@@ -270,6 +270,13 @@ def channels_subscriptions():
 
     return flask.redirect('channels')
 
+@app.route('/archive')
+def archive():
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+
+    return flask.render_template('archive.html', user = flask.session['user'])
+
 @app.route('/api/videos/<channel>/<video>/play')
 def video_play(channel = None, video = None):
     if 'credentials' not in flask.session:
