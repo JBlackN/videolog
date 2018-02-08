@@ -62,27 +62,27 @@
       <div class="row">
         <div class="col-12 mt-3">
           <h3 class="mb-3">Generate youtube-dl configuration</h3>
-          <form>
+          <form action="/archive/config" method="get">
             <div class="form-group">
               <label for="ytdl-socket-timeout">Time to wait before giving up (in seconds)</label>
-              <input type="text" class="form-control" id="ytdl-socket-timeout" pattern="([0-9]|[1-9][0-9]+)" title="Non-negative number (0+)." value="120">
+              <input type="text" class="form-control" id="ytdl-socket-timeout" name="ytdl-socket-timeout" pattern="([0-9]|[1-9][0-9]+)" title="Non-negative number (0+)." value="120">
             </div>
             <div class="form-group">
               <label for="ytdl-retries">Number of retries (or "infinite")</label>
-              <input type="text" class="form-control" id="ytdl-retries" pattern="([0-9]|[1-9][0-9]+|infinite)" title="Non-negative number (0+) or 'infinite'." value="infinite">
+              <input type="text" class="form-control" id="ytdl-retries" name="ytdl-retries" pattern="([0-9]|[1-9][0-9]+|infinite)" title="Non-negative number (0+) or 'infinite'." value="infinite">
             </div>
             <div class="form-group">
               <label for="ytdl-output">Output filename template (see <a href="https://github.com/rg3/youtube-dl/blob/master/README.md#output-template" target="_blank">documentation</a>)</label>
-              <input type="text" class="form-control" id="ytdl-output" value="%(uploader_id)s/%(id)s.%(ext)s">
+              <input type="text" class="form-control" id="ytdl-output" name="ytdl-output" value="%(uploader_id)s/%(id)s.%(ext)s">
             </div>
             <div class="form-group">
               <label for="ytdl-overwrites">Overwrite files</label><br>
               <div class="btn-group btn-group-toggle" data-toggle="buttons">
                 <label class="btn btn-outline-danger">
-                  <input type="radio" name="ytdl-overwrites" id="ytdl-overwrite" autocomplete="off"> Yes
+                  <input type="radio" name="ytdl-overwrites" id="ytdl-overwrite" autocomplete="off" value="true"> Yes
                 </label>
                 <label class="btn btn-outline-success active">
-                  <input type="radio" name="ytdl-overwrites" id="ytdl-no-overwrite" autocomplete="off" checked> No
+                  <input type="radio" name="ytdl-overwrites" id="ytdl-no-overwrite" autocomplete="off" value="false" checked> No
                 </label>
               </div>
             </div>
@@ -90,10 +90,10 @@
               <label for="ytdl-info-json">Write video metadata to a .info.json file</label><br>
               <div class="btn-group btn-group-toggle" data-toggle="buttons">
                 <label class="btn btn-outline-success active">
-                  <input type="radio" name="ytdl-info-json" id="ytdl-write-info-json" autocomplete="off" checked> Yes
+                  <input type="radio" name="ytdl-info-json" id="ytdl-write-info-json" autocomplete="off" value="true" checked> Yes
                 </label>
                 <label class="btn btn-outline-danger">
-                  <input type="radio" name="ytdl-info-json" id="ytdl-no-write-info-json" autocomplete="off"> No
+                  <input type="radio" name="ytdl-info-json" id="ytdl-no-write-info-json" autocomplete="off" value="false"> No
                 </label>
               </div>
             </div>
@@ -101,20 +101,20 @@
               <label for="ytdl-thumbnail">Write thumbnail image to disk</label><br>
               <div class="btn-group btn-group-toggle" data-toggle="buttons">
                 <label class="btn btn-outline-success active">
-                  <input type="radio" name="ytdl-thumbnail" id="ytdl-write-thumbnail" autocomplete="off" checked> Yes
+                  <input type="radio" name="ytdl-thumbnail" id="ytdl-write-thumbnail" autocomplete="off" value="true" checked> Yes
                 </label>
                 <label class="btn btn-outline-danger">
-                  <input type="radio" name="ytdl-thumbnail" id="ytdl-no-write-thumbnail" autocomplete="off"> No
+                  <input type="radio" name="ytdl-thumbnail" id="ytdl-no-write-thumbnail" autocomplete="off" value="false"> No
                 </label>
               </div>
             </div>
             <div class="form-group">
               <label for="ytdl-format">Video format code (see <a href="https://github.com/rg3/youtube-dl/blob/master/README.md#format-selection" target="_blank">documentation</a>)</label>
-              <input type="text" class="form-control" id="ytdl-format" value="bestvideo[vcodec^=vp]+bestaudio[acodec=opus]/bestvideo+bestaudio[acodec=opus]/bestvideo+bestaudio/best">
+              <input type="text" class="form-control" id="ytdl-format" name="ytdl-format" value="bestvideo[vcodec^=vp]+bestaudio[acodec=opus]/bestvideo+bestaudio[acodec=opus]/bestvideo+bestaudio/best">
             </div>
             <div class="form-group">
               <label for="ytdl-merge-format">If a merge is required, output to given container format</label>
-              <select class="form-control" id="ytdl-merge-format">
+              <select class="form-control" id="ytdl-merge-format" name="ytdl-merge-format">
                 <option value="mkv" selected>Matroska (MKV)</option>
                 <option value="mp4">MP4</option>
                 <option value="webm">WebM</option>
@@ -126,20 +126,20 @@
               <label for="ytdl-all-subs">Download all the available subtitles of the video</label><br>
               <div class="btn-group btn-group-toggle" data-toggle="buttons">
                 <label class="btn btn-outline-success active">
-                  <input type="radio" name="ytdl-all-subs" id="ytdl-write-all-subs" autocomplete="off" checked> Yes
+                  <input type="radio" name="ytdl-all-subs" id="ytdl-write-all-subs" autocomplete="off" value="true" checked> Yes
                 </label>
                 <label class="btn btn-outline-danger">
-                  <input type="radio" name="ytdl-all-subs" id="ytdl-no-write-all-subs" autocomplete="off"> No
+                  <input type="radio" name="ytdl-all-subs" id="ytdl-no-write-all-subs" autocomplete="off" value="false"> No
                 </label>
               </div>
             </div>
             <div class="form-group">
               <label for="ytdl-sub-format">Subtitle format, accepts formats preference (eg. "srt" or "ass/srt/best")</label>
-              <input type="text" class="form-control" id="ytdl-sub-format" value="srt/best">
+              <input type="text" class="form-control" id="ytdl-sub-format" name="ytdl-sub-format" value="srt/best">
             </div>
             <div class="form-group">
               <label for="ytdl-convert-subs">Convert the subtitles to other format</label>
-              <select class="form-control" id="ytdl-convert-subs">
+              <select class="form-control" id="ytdl-convert-subs" name="ytdl-convert-subs">
                 <option value="srt" selected>SRT</option>
                 <option value="ass">ASS</option>
                 <option value="vtt">VTT</option>

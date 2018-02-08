@@ -411,6 +411,52 @@ def archive_comments():
     archive_comments.seek(0)
     return flask.send_file(archive_comments, mimetype = 'application/zip', as_attachment = True, attachment_filename = 'archive_comments.zip')
 
+@app.route('/archive/config')
+def archive_config():
+    try:
+        check_auth()
+    except Exception as e:
+        return flask.redirect(str(e))
+
+    socket_timeout = flask.request.args.get('ytdl-socket-timeout', '120')
+    retries = flask.request.args.get('ytdl-retries', 'infinite')
+    output = flask.request.args.get('ytdl-output', '%(uploader_id)s/%(id)s.%(ext)s')
+    overwrites = flask.request.args.get('ytdl-overwrites', 'false') == 'true'
+    info_json = flask.request.args.get('ytdl-info-json', 'true') == 'true'
+    thumbnail = flask.request.args.get('ytdl-thumbnail', 'true') == 'true'
+    format = flask.request.args.get('ytdl-format', 'bestvideo[vcodec^=vp]' +
+             '+bestaudio[acodec=opus]/bestvideo+bestaudio[acodec=opus]' +
+             '/bestvideo+bestaudio/best')
+    merge_format = flask.request.args.get('ytdl-merge-format', 'mkv')
+    all_subs = flask.request.args.get('ytdl-all-subs', 'true') == 'true'
+    sub_format = flask.request.args.get('ytdl-sub-format', 'srt/best')
+    convert_subs = flask.request.args.get('ytdl-convert-subs', 'srt')
+
+    config = io.BytesIO()
+
+    config.write(('--socket-timeout ' + socket_timeout + '\n').encode('utf-8'))
+    config.write(('--retries ' + retries + '\n').encode('utf-8'))
+    config.write(('--output ' + output + '\n').encode('utf-8'))
+    if not overwrites:
+        config.write('--no-overwrites\n'.encode('utf-8'))
+    if info_json:
+        config.write('--write-info-json\n'.encode('utf-8'))
+    if thumbnail:
+        config.write('--write-thumbnail\n'.encode('utf-8'))
+    config.write(('--format ' + format + '\n').encode('utf-8'))
+    config.write(('--merge-output-format ' + merge_format + '\n').encode('utf-8'))
+    if all_subs:
+        config.write('--all-subs\n'.encode('utf-8'))
+    config.write(('--sub-format ' + sub_format + '\n').encode('utf-8'))
+    config.write(('--convert-subs ' + convert_subs + '\n').encode('utf-8'))
+
+    config.seek(0)
+
+    return flask.Response(config,
+        mimetype = 'text/plain',
+        headers = { 'Content-Disposition': 'attachment;filename=config.txt' }
+    )
+
 @app.route('/api/videos/<channel>/<video>/play')
 def video_play(channel = None, video = None):
     try:
