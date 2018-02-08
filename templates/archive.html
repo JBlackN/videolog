@@ -49,11 +49,11 @@
       <div class="row">
         <div class="col-12 mt-3">
           <h3 class="mb-3">Rename archive playlists</h3>
-          {% for archive in [None] %} <!-- TODO -->
-            <div class="input-group">
-              <input type="text" class="form-control" value="{{ archive }}" aria-label="{{ archive }}"> <!-- TODO -->
+          {% for archive in archives %}
+            <div id="archive-rename-{{ archive['id'] }}" class="input-group">
+              <input type="text" class="form-control" value="{{ archive['snippet']['title'] }}" aria-label="{{ archive['snippet']['title'] }}" data-original-value="{{ archive['snippet']['title'] }}">
               <div class="input-group-append">
-                <button class="btn btn-outline-warning" type="button">Rename</button>
+                <button class="btn btn-outline-warning" type="button" disabled>Rename</button>
               </div>
             </div>
           {% endfor %}
@@ -199,6 +199,22 @@
       $('#archive-comments').click(function() {
         window.location = window.location.origin + '/archive/comments'
       });
+
+      {% for archive in archives %}
+      $('#archive-rename-{{ archive['id'] }} input').on('input', function() {
+        if ($(this).val() != $(this).data('originalValue')) {
+          $('#archive-rename-{{ archive['id'] }} button').prop('disabled', false);
+        }
+        else {
+          $('#archive-rename-{{ archive['id'] }} button').prop('disabled', true);
+        }
+      });
+
+      $('#archive-rename-{{ archive['id'] }} button').click(function() {
+        var id = $('#archive-rename-{{ archive['id'] }} input').val();
+        window.location = window.location.origin + '/archive/rename/{{ archive['id'] }}?name=' + encodeURIComponent(id);
+      });
+      {% endfor %}
     });
   </script>
 {% endblock %}

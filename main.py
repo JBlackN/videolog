@@ -280,10 +280,11 @@ def archive():
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
 
-    return flask.render_template('archive.html', user = flask.session['user'])
+    return flask.render_template('archive.html', user = flask.session['user'],
+        archives = db_get_archives())
 
 @app.route('/archive/<type>/<id>')
-def archive_insert(type = None, id = None):
+def archive_insert_rename(type = None, id = None):
     if 'credentials' not in flask.session:
         return flask.redirect('authorize')
 
@@ -331,6 +332,11 @@ def archive_insert(type = None, id = None):
                         }
                     db[flask.session['user']['id']][video['snippet']['channelId']]['archived'][video_id] = archive['id']
                     update_db(db)
+        elif type == 'rename':
+            name = flask.request.args.get('name', None)
+            if name is not None:
+                yt_rename_playlist(id, name)
+                time.sleep(5)
 
     return flask.redirect(flask.url_for('archive'))
 
@@ -917,6 +923,15 @@ def yt_get_playlist_items(playlist_id):
             return items
         else:
             kwargs['pageToken'] = response['nextPageToken']
+
+def yt_rename_playlist(playlist_id, name):
+    yt_get_client().playlists().update(
+        body = build_resource({
+            'id': playlist_id,
+            'snippet.title': name
+        }),
+        part = 'snippet'
+    ).execute()
 
 def yt_get_client():
     credentials = google.oauth2.credentials.Credentials(
