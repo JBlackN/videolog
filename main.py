@@ -621,6 +621,8 @@ def db_update_archives():
 
                 if video['id'] not in db[flask.session['user']['id']][video['snippet']['channelId']]['archived']:
                     db[flask.session['user']['id']][video['snippet']['channelId']]['archived'][video['id']] = archive['id']
+            else:
+                archived_video_ids_remote.append(video['snippet']['resourceId']['videoId'])
 
     for channel_id, channel in db[flask.session['user']['id']].items():
         for video_id in channel['archived'].keys():
