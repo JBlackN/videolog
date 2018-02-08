@@ -25,15 +25,17 @@
       <div class="row">
         <div class="col-12 mt-3">
           <h3 class="mb-3">Generate batch file for youtube-dl</h3>
-          <div class="input-group">
-            <div class="custom-file">
-              <input type="file" class="custom-file-input" id="archiveFile">
-              <label class="custom-file-label" for="archiveFile">(Optional) Choose youtube-dl archive file</label>
+          <form enctype="multipart/form-data" action="/archive/batch" method="post">
+            <div class="input-group">
+              <div class="custom-file">
+                <input type="file" class="custom-file-input" id="archiveFile" name="archiveFile">
+                <label class="custom-file-label" for="archiveFile">(Optional) Choose youtube-dl archive file</label>
+              </div>
+              <div class="input-group-append">
+                <input class="btn btn-outline-primary" type="submit" value="Generate">
+              </div>
             </div>
-            <div class="input-group-append">
-              <button class="btn btn-outline-primary" type="button">Generate</button>
-            </div>
-          </div>
+          </form>
         </div>
       </div>
       <div class="row">
@@ -188,6 +190,10 @@
       $('#archive-pid').click(function() {
         var id = $('#archive-input').val();
         window.location = window.location.origin + '/archive/playlist/' + id;
+      });
+
+      $('#archiveFile').change(function() {
+        $('label[for="archiveFile"]').text($('#archiveFile').val());
       });
     });
   </script>

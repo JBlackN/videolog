@@ -332,6 +332,37 @@ def archive_insert(type = None, id = None):
 
     return flask.redirect(flask.url_for('archive'))
 
+@app.route('/archive/batch', methods = ['POST'])
+def archive_batch():
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+
+    batch = set()
+
+    if 'archiveFile' in flask.request.files:
+        file = flask.request.files['archiveFile']
+        if file.filename != '':
+            if file and allowed_file(file.filename):
+                downloaded = [
+                    line.decode('utf-8').rstrip('\n').split(' ')[1]
+                    for line in file.readlines()
+                ]
+                archived = db_get_archived()
+
+                for video_id in archived:
+                    if video_id not in downloaded:
+                        batch.add(video_id)
+    else:
+        archived = db_get_archived()
+
+        for video_id in archived:
+            batch.add(video_id)
+
+    return flask.Response('\n'.join(list(batch)),
+        mimetype = 'text/plain',
+        headers = { 'Content-Disposition': 'attachment;filename=batch.txt' }
+    )
+
 @app.route('/api/videos/<channel>/<video>/play')
 def video_play(channel = None, video = None):
     if 'credentials' not in flask.session:
@@ -581,6 +612,15 @@ def db_update_archives():
         db[flask.session['user']['id']][item[0]]['archived'].pop(item[1])
 
     update_db(db)
+
+def db_get_archived():
+    db = get_db()
+
+    return set([
+        video_id
+        for channel in db[flask.session['user']['id']].values()
+        for video_id in channel['archived'].keys()
+    ])
 
 def yt_get_user():
     client = yt_get_client()
@@ -934,6 +974,12 @@ def build_resource(properties):
                 # already has a "snippet" object.
                 ref = ref[key]
     return resource
+
+def allowed_file(filename):
+    return not ('.' in filename and \
+            filename.rsplit('.', 1)[1].lower() in set([
+                'html', 'htm', 'xhtml', 'php'
+            ]))
 
 @app.route('/authorize')
 def authorize():
