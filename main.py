@@ -413,7 +413,9 @@ def archive_comments():
 
 @app.route('/api/videos/<channel>/<video>/play')
 def video_play(channel = None, video = None):
-    if 'credentials' not in flask.session:
+    try:
+        check_auth()
+    except Exception as e:
         return flask.jsonify(False)
 
     if channel is not None and video is not None:
@@ -426,7 +428,9 @@ def video_play(channel = None, video = None):
 
 @app.route('/api/videos/<channel>/<video>/unplay')
 def video_unplay(channel = None, video = None):
-    if 'credentials' not in flask.session:
+    try:
+        check_auth()
+    except Exception as e:
         return flask.jsonify(False)
 
     if channel is not None and video is not None:
@@ -439,7 +443,9 @@ def video_unplay(channel = None, video = None):
 
 @app.route('/api/videos/<channel>/<video>/archive')
 def video_archive(channel = None, video = None):
-    if 'credentials' not in flask.session:
+    try:
+        check_auth()
+    except Exception as e:
         return flask.jsonify(False)
 
     if channel is not None and video is not None:
@@ -462,7 +468,9 @@ def video_archive(channel = None, video = None):
 
 @app.route('/api/videos/<channel>/<video>/unarchive')
 def video_unarchive(channel = None, video = None):
-    if 'credentials' not in flask.session:
+    try:
+        check_auth()
+    except Exception as e:
         return flask.jsonify(False)
 
     if channel is not None and video is not None:
@@ -478,7 +486,9 @@ def video_unarchive(channel = None, video = None):
 
 @app.route('/api/videos/<channel>/<video>/rate')
 def video_rate(channel = None, video = None):
-    if 'credentials' not in flask.session:
+    try:
+        check_auth()
+    except Exception as e:
         return flask.jsonify(False)
 
     rating = flask.request.args.get('rating', None)
@@ -491,7 +501,9 @@ def video_rate(channel = None, video = None):
 
 @app.route('/api/videos/<channel>/<video>/playlists')
 def video_playlists(channel = None, video = None):
-    if 'credentials' not in flask.session:
+    try:
+        check_auth()
+    except Exception as e:
         return flask.jsonify(False)
 
     data = flask.request.args.get('data', None)
@@ -532,7 +544,9 @@ def video_playlists(channel = None, video = None):
 
 @app.route('/api/videos/<channel>/<video>/subscribe')
 def video_subscribe(channel = None, video = None):
-    if 'credentials' not in flask.session:
+    try:
+        check_auth()
+    except Exception as e:
         return flask.jsonify(False)
 
     if channel is not None and video is not None:
@@ -548,7 +562,9 @@ def video_subscribe(channel = None, video = None):
 
 @app.route('/api/videos/<channel>/<video>/unsubscribe')
 def video_unsubscribe(channel = None, video = None):
-    if 'credentials' not in flask.session:
+    try:
+        check_auth()
+    except Exception as e:
         return flask.jsonify(False)
 
     if channel is not None and video is not None:
@@ -562,7 +578,9 @@ def video_unsubscribe(channel = None, video = None):
 
 @app.route('/api/videos/<channel>/<video>/comments')
 def video_comments(channel = None, video = None):
-    if 'credentials' not in flask.session:
+    try:
+        check_auth()
+    except Exception as e:
         return flask.jsonify(False)
 
     if channel is not None and video is not None:
