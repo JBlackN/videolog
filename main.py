@@ -1,10 +1,12 @@
 import datetime
+import io
 import json
 import os
 import random
 import re
 import time
 import urllib
+import zipfile
 
 import flask
 import google.oauth2.credentials
@@ -363,6 +365,26 @@ def archive_batch():
         headers = { 'Content-Disposition': 'attachment;filename=batch.txt' }
     )
 
+@app.route('/archive/comments')
+def archive_comments():
+    if 'credentials' not in flask.session:
+        return flask.redirect('authorize')
+
+    archive_comments = io.BytesIO()
+
+    with zipfile.ZipFile(archive_comments, 'w') as zf:
+        for video_id in db_get_archived():
+            video = yt_get_video(video_id)
+            comments = yt_get_comments(video_id)
+
+            zf.writestr(
+                video['snippet']['channelId'] + '/' + video_id + '.comments.json',
+                json.dumps(comments, indent = 2, sort_keys = True)
+              )
+
+    archive_comments.seek(0)
+    return flask.send_file(archive_comments, mimetype = 'application/zip', as_attachment = True, attachment_filename = 'archive_comments.zip')
+
 @app.route('/api/videos/<channel>/<video>/play')
 def video_play(channel = None, video = None):
     if 'credentials' not in flask.session:
@@ -518,38 +540,7 @@ def video_comments(channel = None, video = None):
         return flask.jsonify(False)
 
     if channel is not None and video is not None:
-        comments = []
-
-        for thread in yt_get_comments(video):
-            thread_comment = thread['snippet']['topLevelComment']
-
-            comment = {
-                'author': {
-                    'id': thread_comment['snippet']['authorChannelId']['value'],
-                    'image': thread_comment['snippet']['authorProfileImageUrl'],
-                    'name': thread_comment['snippet']['authorDisplayName']
-                },
-                'created': thread_comment['snippet']['publishedAt'],
-                'likes': thread_comment['snippet']['likeCount'],
-                'modified': thread_comment['snippet']['updatedAt'],
-                'replies': [],
-                'text': thread_comment['snippet']['textDisplay']
-            }
-
-            for reply in thread['replies']['comments']:
-                comment['replies'].append({
-                    'author': {
-                        'id': reply['snippet']['authorChannelId']['value'],
-                        'image': reply['snippet']['authorProfileImageUrl'],
-                        'name': reply['snippet']['authorDisplayName']
-                    },
-                    'created': reply['snippet']['publishedAt'],
-                    'likes': reply['snippet']['likeCount'],
-                    'modified': reply['snippet']['updatedAt'],
-                    'text': reply['snippet']['textDisplay']
-                })
-
-            comments.append(comment)
+        comments = yt_get_comments(video)
 
         return flask.Response(json.dumps(comments, indent = 2, sort_keys = True),
             mimetype = 'application/json',
