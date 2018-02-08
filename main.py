@@ -24,8 +24,10 @@ app.secret_key = b'\xfb\x04\x088E6\xff\xd2\x86\x93\xcef%\x1b\xe6F9`o\xb8\xbd\xc3
 
 @app.route('/')
 def index():
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
+    try:
+        check_auth()
+    except Exception as e:
+        return flask.redirect(str(e))
 
     db_update_archives()
 
@@ -36,8 +38,10 @@ def index():
 @app.route('/videos/<channel>')
 @app.route('/videos/<channel>/<video>')
 def videos(user = None, tracks = [], subs = [], channel = None, video = None):
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
+    try:
+        check_auth()
+    except Exception as e:
+        return flask.redirect(str(e))
 
     tracks = yt_get_tracks(sort_by_played = True)
 
@@ -160,8 +164,10 @@ def videos(user = None, tracks = [], subs = [], channel = None, video = None):
 
 @app.route('/channels')
 def channels(user = None, subs = None, tracks = [], tracking = False, error = False):
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
+    try:
+        check_auth()
+    except Exception as e:
+        return flask.redirect(str(e))
 
     if 'channels_query_error' in flask.session:
         error = flask.session.pop('channels_query_error')
@@ -172,8 +178,10 @@ def channels(user = None, subs = None, tracks = [], tracking = False, error = Fa
 
 @app.route('/channels-track')
 def channels_track(user = None, subs = [], tracks = [], tracking = True, error = False):
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
+    try:
+        check_auth()
+    except Exception as e:
+        return flask.redirect(str(e))
 
     return flask.render_template('channels.html', user = flask.session['user'],
         subs = yt_get_subscriptions(), tracks = db_get_channels(),
@@ -181,8 +189,10 @@ def channels_track(user = None, subs = [], tracks = [], tracking = True, error =
 
 @app.route('/channels-update')
 def channels_update():
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
+    try:
+        check_auth()
+    except Exception as e:
+        return flask.redirect(str(e))
 
     db = get_db()
     tracks = flask.request.args.get('tracks', None)
@@ -248,8 +258,10 @@ def channels_update():
 
 @app.route('/channels-subscriptions')
 def channels_subscriptions():
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
+    try:
+        check_auth()
+    except Exception as e:
+        return flask.redirect(str(e))
 
     client = yt_get_client()
     update = flask.request.args.get('update', None)
@@ -277,16 +289,20 @@ def channels_subscriptions():
 
 @app.route('/archive')
 def archive():
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
+    try:
+        check_auth()
+    except Exception as e:
+        return flask.redirect(str(e))
 
     return flask.render_template('archive.html', user = flask.session['user'],
         archives = db_get_archives())
 
 @app.route('/archive/<type>/<id>')
 def archive_insert_rename(type = None, id = None):
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
+    try:
+        check_auth()
+    except Exception as e:
+        return flask.redirect(str(e))
 
     db = get_db()
 
@@ -342,8 +358,10 @@ def archive_insert_rename(type = None, id = None):
 
 @app.route('/archive/batch', methods = ['POST'])
 def archive_batch():
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
+    try:
+        check_auth()
+    except Exception as e:
+        return flask.redirect(str(e))
 
     batch = set()
 
@@ -373,8 +391,10 @@ def archive_batch():
 
 @app.route('/archive/comments')
 def archive_comments():
-    if 'credentials' not in flask.session:
-        return flask.redirect('authorize')
+    try:
+        check_auth()
+    except Exception as e:
+        return flask.redirect(str(e))
 
     archive_comments = io.BytesIO()
 
@@ -1032,6 +1052,18 @@ def oauth2callback():
     update_db(db)
 
     return flask.redirect(flask.url_for('index'))
+
+def check_auth():
+    if 'credentials' not in flask.session:
+        raise Exception('authorize')
+    else:
+        if 'token' in flask.session['credentials']:
+            base_url = 'https://www.googleapis.com/oauth2/v3/tokeninfo?access_token='
+            response = requests.get(base_url + flask.session['credentials']['token'])
+            if response.status_code == 400:
+                raise Exception('logout')
+        else:
+            raise Exception('logout')
 
 @app.route('/logout')
 def logout():
