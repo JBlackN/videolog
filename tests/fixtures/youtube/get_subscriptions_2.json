@@ -1,0 +1,67 @@
+{
+ "kind": "youtube#subscriptionListResponse",
+ "etag": "\"_gJQceDMxJ8gP-8T2HLXUoURK8c/0xegvD0P9-tYOiOM_NL1LfDi4lw\"",
+ "prevPageToken": "CAIQAQ",
+ "pageInfo": {
+  "totalResults": 49,
+  "resultsPerPage": 2
+ },
+ "items": [
+  {
+
+
+   "kind": "youtube#subscription",
+   "etag": "\"_gJQceDMxJ8gP-8T2HLXUoURK8c/VzuU2B_4sVlCsRFgQxh_mF_Gmdc\"",
+   "id": "MpajmvGNexIkHC8F7y2fiVn_Hu_lfY-ZLzRKqVI4dGo",
+   "snippet": {
+    "publishedAt": "2017-08-16T00:09:44.000Z",
+    "title": "apigee",
+    "description": "Welcome to Apigee's YouTube channel, the place to learn how APIs, apps, and big data analysis are helping organizations undergo digital transformations. These videos cover a wealth of topics, including the app economy, API design and management, predictive analytics, security, the Internet of Things, and digital asset monetization, all geared toward enterprises that are building APIs and the developers who build apps to run on them. Please subscribe!",
+    "resourceId": {
+     "kind": "youtube#channel",
+     "channelId": "UCH7xyou6RXO8PKwMZ4nQ64Q"
+    },
+    "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+    "thumbnails": {
+     "default": {
+      "url": "https://yt3.ggpht.com/-LfwHhRnzR-o/AAAAAAAAAAI/AAAAAAAAAAA/3vvb_kvh5RM/s88-c-k-no-mo-rj-c0xffffff/photo.jpg"
+     },
+     "medium": {
+      "url": "https://yt3.ggpht.com/-LfwHhRnzR-o/AAAAAAAAAAI/AAAAAAAAAAA/3vvb_kvh5RM/s240-c-k-no-mo-rj-c0xffffff/photo.jpg"
+     },
+     "high": {
+      "url": "https://yt3.ggpht.com/-LfwHhRnzR-o/AAAAAAAAAAI/AAAAAAAAAAA/3vvb_kvh5RM/s240-c-k-no-mo-rj-c0xffffff/photo.jpg"
+     }
+    }
+   }
+  },
+  {
+
+
+   "kind": "youtube#subscription",
+   "etag": "\"_gJQceDMxJ8gP-8T2HLXUoURK8c/jbyzk-aBK3qPGKHttyPdhc7zkIM\"",
+   "id": "MpajmvGNexIkHC8F7y2fiaLMDN6JNxp1K4Jl2GuLQnA",
+   "snippet": {
+    "publishedAt": "2017-07-06T07:15:11.000Z",
+    "title": "David Guetta",
+    "description": "The OFFICIAL YouTube channel for David Guetta. All your favorite music videos, lyric videos, documentaries, and behind-the-scenes access in one location. Make sure you subscribe and keep checking back for updates regularly.",
+    "resourceId": {
+     "kind": "youtube#channel",
+     "channelId": "UC1l7wYrva1qCH-wgqcHaaRg"
+    },
+    "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+    "thumbnails": {
+     "default": {
+      "url": "https://yt3.ggpht.com/-8eyQisUEhmo/AAAAAAAAAAI/AAAAAAAAAAA/BxYQwlspE6Q/s88-c-k-no-mo-rj-c0xffffff/photo.jpg"
+     },
+     "medium": {
+      "url": "https://yt3.ggpht.com/-8eyQisUEhmo/AAAAAAAAAAI/AAAAAAAAAAA/BxYQwlspE6Q/s240-c-k-no-mo-rj-c0xffffff/photo.jpg"
+     },
+     "high": {
+      "url": "https://yt3.ggpht.com/-8eyQisUEhmo/AAAAAAAAAAI/AAAAAAAAAAA/BxYQwlspE6Q/s240-c-k-no-mo-rj-c0xffffff/photo.jpg"
+     }
+    }
+   }
+  }
+ ]
+}

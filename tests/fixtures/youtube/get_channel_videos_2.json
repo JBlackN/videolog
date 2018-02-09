@@ -1,0 +1,96 @@
+{
+  "kind": "youtube#playlistItemListResponse",
+  "etag": "\"_gJQceDMxJ8gP-8T2HLXUoURK8c/Os9H0TxSfomKgf5kuCkQMM-2xcw\"",
+  "nextPageToken": "CAIQAA",
+  "pageInfo": {
+    "totalResults": 4588,
+    "resultsPerPage": 2
+  },
+  "items": [
+    {
+      "kind": "youtube#playlistItem",
+      "etag": "\"_gJQceDMxJ8gP-8T2HLXUoURK8c/RVKsr8jsk2HtT9LDgiLijS1Cnyc\"",
+      "id": "VVVfeDVYRzFPVjJQNnVaWjVGU005VHR3LlhkWlhwRkJ2VFA4",
+      "snippet": {
+        "publishedAt": "2018-02-07T18:00:06.000Z",
+        "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+        "title": "Integrating Smart Home Devices with the Google Assistant",
+        "description": "To get started, read the building Smart Home apps documentation here: https://goo.gl/NyfeUe\n\nNick Felker introduces how developers can integrate their Smart Home devices with the Google Assistant. This video shows how to build a webhook for the HomeGraph to sync, query, and execute commands on IoT devices including smart light bulbs, thermostats, vacuums, cameras, dishwashers, dryers, outlets, switches, washers, locks, fridges, fans, and more.\n\nWatch more videos on how to build apps for the Google Assistant: https://goo.gl/SWJfNC \n\nSubscribe to the channel to never miss an episode: http://goo.gl/mQyv5L",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/XdZXpFBvTP8/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/XdZXpFBvTP8/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/XdZXpFBvTP8/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/XdZXpFBvTP8/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          }
+        },
+        "channelTitle": "Google Developers",
+        "playlistId": "UU_x5XG1OV2P6uZZ5FSM9Ttw",
+        "position": 0,
+        "resourceId": {
+          "kind": "youtube#video",
+          "videoId": "XdZXpFBvTP8"
+        }
+      }
+    },
+    {
+      "kind": "youtube#playlistItem",
+      "etag": "\"_gJQceDMxJ8gP-8T2HLXUoURK8c/_nSE_MLsFsxNeGwNz92nQnToVco\"",
+      "id": "VVVfeDVYRzFPVjJQNnVaWjVGU005VHR3LjNKOEFKb25tVEhz",
+      "snippet": {
+        "publishedAt": "2018-02-07T21:59:47.000Z",
+        "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+        "title": "Dart 2 & Flutter - DevShow at DartConf 2018",
+        "description": "Emily Fortuna chats with Matt Sullivan about Dart 2 and Flutter at DartConf 2018. Watch to learn more about Dart semantics and compiling Dart to JavaScript!\n\nWatch Matt & Emily’s full session → https://goo.gl/3XHc7M\nCatch all the sessions from DartConf 2018 here → https://goo.gl/WqfKf2\nCheck out DevShow’s event coverage → https://goo.gl/R1htuu\n\nThe Developer Show is where you can stay up to date on all the latest Google Developer news, straight from the experts. \n\nHave a question? Use #AskDevShow to let us know!\nSubscribe to the Google Developers Channel for more DevShow! http://goo.gl/mQyv5L",
+        "thumbnails": {
+          "default": {
+            "url": "https://i.ytimg.com/vi/3J8AJonmTHs/default.jpg",
+            "width": 120,
+            "height": 90
+          },
+          "medium": {
+            "url": "https://i.ytimg.com/vi/3J8AJonmTHs/mqdefault.jpg",
+            "width": 320,
+            "height": 180
+          },
+          "high": {
+            "url": "https://i.ytimg.com/vi/3J8AJonmTHs/hqdefault.jpg",
+            "width": 480,
+            "height": 360
+          },
+          "standard": {
+            "url": "https://i.ytimg.com/vi/3J8AJonmTHs/sddefault.jpg",
+            "width": 640,
+            "height": 480
+          },
+          "maxres": {
+            "url": "https://i.ytimg.com/vi/3J8AJonmTHs/maxresdefault.jpg",
+            "width": 1280,
+            "height": 720
+          }
+        },
+        "channelTitle": "Google Developers",
+        "playlistId": "UU_x5XG1OV2P6uZZ5FSM9Ttw",
+        "position": 1,
+        "resourceId": {
+          "kind": "youtube#video",
+          "videoId": "3J8AJonmTHs"
+        }
+      }
+    }
+  ]
+}

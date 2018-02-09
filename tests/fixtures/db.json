@@ -1,0 +1,12 @@
+{
+  "user_id": {
+    "channel_id": {
+      "archived": {
+        "video_id": "playlist_id"
+      },
+      "played": {
+        "video_id": "timestamp"
+      }
+    }
+  }
+}

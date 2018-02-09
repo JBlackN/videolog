@@ -1,0 +1,67 @@
+{
+ "kind": "youtube#subscriptionListResponse",
+ "etag": "\"_gJQceDMxJ8gP-8T2HLXUoURK8c/XmfvDFFWdMaCgsQhtTp6v4Li9kw\"",
+ "nextPageToken": "CAIQAA",
+ "pageInfo": {
+  "totalResults": 49,
+  "resultsPerPage": 2
+ },
+ "items": [
+  {
+
+
+   "kind": "youtube#subscription",
+   "etag": "\"_gJQceDMxJ8gP-8T2HLXUoURK8c/bXquRC7bM0M8_BvdAEhwxo2wjEI\"",
+   "id": "MpajmvGNexIkHC8F7y2fiSTLzSRwLzqiDEJZG8lxZNQ",
+   "snippet": {
+    "publishedAt": "2018-02-09T00:17:29.685Z",
+    "title": "Dialogflow",
+    "description": "Welcome to our YouTube channel! Browse around for best practices, tutorials, and deep dives for using Dialogflow.\n\nDialogflow is a NLU platform for building natural and rich conversational experiences. Give users new ways to interact with your product by building engaging experiences powered by machine learning.",
+    "resourceId": {
+     "kind": "youtube#channel",
+     "channelId": "UC1EXoqvR9VrmWnM9S47SfVA"
+    },
+    "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+    "thumbnails": {
+     "default": {
+      "url": "https://yt3.ggpht.com/-F0Bnlbv5oCk/AAAAAAAAAAI/AAAAAAAAAAA/aU9trBR9H5Y/s88-c-k-no-mo-rj-c0xffffff/photo.jpg"
+     },
+     "medium": {
+      "url": "https://yt3.ggpht.com/-F0Bnlbv5oCk/AAAAAAAAAAI/AAAAAAAAAAA/aU9trBR9H5Y/s240-c-k-no-mo-rj-c0xffffff/photo.jpg"
+     },
+     "high": {
+      "url": "https://yt3.ggpht.com/-F0Bnlbv5oCk/AAAAAAAAAAI/AAAAAAAAAAA/aU9trBR9H5Y/s240-c-k-no-mo-rj-c0xffffff/photo.jpg"
+     }
+    }
+   }
+  },
+  {
+
+
+   "kind": "youtube#subscription",
+   "etag": "\"_gJQceDMxJ8gP-8T2HLXUoURK8c/_5KKGXpOswBZOcqb_EAnE99A1-E\"",
+   "id": "MpajmvGNexIo-VllBd2eTP0cR2c_IK9tKnN-JMChPWE",
+   "snippet": {
+    "publishedAt": "2018-02-06T22:24:58.788Z",
+    "title": "Creator Insider",
+    "description": "Creator Insider is an informal YouTube channel to share information from the YouTube Creator technical team with the wider Creator community.  Our team works on the product you use with YouTube to manage your channel. We will feature different people talking about the products they work on and changes we are making so YouTube creators have more context. Please note this is not an official YouTube channel and is an experiment. Also we are biased to rapid communication over video quality. If you like it we will do our best to continue. If not, we'll get back to our day jobs :-)\n\nTom will be kicking off the series with Tom's Take videos.",
+    "resourceId": {
+     "kind": "youtube#channel",
+     "channelId": "UCGg-UqjRgzhYDPJMr-9HXCg"
+    },
+    "channelId": "UC_x5XG1OV2P6uZZ5FSM9Ttw",
+    "thumbnails": {
+     "default": {
+      "url": "https://yt3.ggpht.com/--MrMVjUr-W8/AAAAAAAAAAI/AAAAAAAAAAA/0TECl_NmYQc/s88-c-k-no-mo-rj-c0xffffff/photo.jpg"
+     },
+     "medium": {
+      "url": "https://yt3.ggpht.com/--MrMVjUr-W8/AAAAAAAAAAI/AAAAAAAAAAA/0TECl_NmYQc/s240-c-k-no-mo-rj-c0xffffff/photo.jpg"
+     },
+     "high": {
+      "url": "https://yt3.ggpht.com/--MrMVjUr-W8/AAAAAAAAAAI/AAAAAAAAAAA/0TECl_NmYQc/s240-c-k-no-mo-rj-c0xffffff/photo.jpg"
+     }
+    }
+   }
+  }
+ ]
+}
