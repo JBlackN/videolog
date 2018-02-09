@@ -1,4 +1,3 @@
-import datetime
 import io
 import json
 import random
@@ -8,28 +7,22 @@ import urllib
 import zipfile
 
 import flask
-import google_auth_oauthlib.flow
-import requests
 
-from yt_archive.constants import CLIENT_SECRETS_FILE, SCOPES
+from yt_archive.auth import auth_check
 from yt_archive.db import get_db, update_db
 from yt_archive.db import db_get_archived, db_get_archives, db_get_channels
 from yt_archive.db import db_update_archives
 from yt_archive.helpers import allowed_file, build_resource
-from yt_archive.youtube import yt_get_client, yt_get_user
+from yt_archive.youtube import yt_get_client
 from yt_archive.youtube import yt_get_subscriptions, yt_get_tracks
 from yt_archive.youtube import yt_get_channel_videos, yt_get_playlist_items
 from yt_archive.youtube import yt_get_video, yt_get_comments
 from yt_archive.youtube import yt_create_archive, yt_rename_playlist
-from yt_archive.youtube import yt_insert_to_playlist, yt_remove_from_playlist
+from yt_archive.youtube import yt_insert_to_playlist
 
-app = flask.Flask(__name__)
-app.secret_key = b'\xfb\x04\x088E6\xff\xd2\x86\x93\xcef%\x1b\xe6F9`o\xb8\xbd\xc3\xf3['
-
-@app.route('/')
-def index():
+def web_index():
     try:
-        check_auth()
+        auth_check()
     except Exception as e:
         return flask.redirect(str(e))
 
@@ -38,12 +31,9 @@ def index():
     return flask.redirect('videos')
 
 
-@app.route('/videos')
-@app.route('/videos/<channel>')
-@app.route('/videos/<channel>/<video>')
-def videos(user = None, tracks = [], subs = [], channel = None, video = None):
+def web_videos(user = None, tracks = [], subs = [], channel = None, video = None):
     try:
-        check_auth()
+        auth_check()
     except Exception as e:
         return flask.redirect(str(e))
 
@@ -166,10 +156,9 @@ def videos(user = None, tracks = [], subs = [], channel = None, video = None):
                 channel = channel, video = yt_get_video(video)
             )
 
-@app.route('/channels')
-def channels(user = None, subs = None, tracks = [], tracking = False, error = False):
+def web_channels(user = None, subs = None, tracks = [], tracking = False, error = False):
     try:
-        check_auth()
+        auth_check()
     except Exception as e:
         return flask.redirect(str(e))
 
@@ -180,10 +169,9 @@ def channels(user = None, subs = None, tracks = [], tracking = False, error = Fa
         subs = yt_get_subscriptions(list_only = True), tracks = yt_get_tracks(),
         tracking = tracking, error = error)
 
-@app.route('/channels-track')
-def channels_track(user = None, subs = [], tracks = [], tracking = True, error = False):
+def web_channels_track(user = None, subs = [], tracks = [], tracking = True, error = False):
     try:
-        check_auth()
+        auth_check()
     except Exception as e:
         return flask.redirect(str(e))
 
@@ -191,10 +179,9 @@ def channels_track(user = None, subs = [], tracks = [], tracking = True, error =
         subs = yt_get_subscriptions(), tracks = db_get_channels(),
         tracking = tracking, error = error)
 
-@app.route('/channels-update')
-def channels_update():
+def web_channels_update():
     try:
-        check_auth()
+        auth_check()
     except Exception as e:
         return flask.redirect(str(e))
 
@@ -260,10 +247,9 @@ def channels_update():
 
     return flask.redirect('channels')
 
-@app.route('/channels-subscriptions')
-def channels_subscriptions():
+def web_channels_subscriptions():
     try:
-        check_auth()
+        auth_check()
     except Exception as e:
         return flask.redirect(str(e))
 
@@ -291,20 +277,18 @@ def channels_subscriptions():
 
     return flask.redirect('channels')
 
-@app.route('/archive')
-def archive():
+def web_archive():
     try:
-        check_auth()
+        auth_check()
     except Exception as e:
         return flask.redirect(str(e))
 
     return flask.render_template('archive.html', user = flask.session['user'],
         archives = db_get_archives())
 
-@app.route('/archive/<type>/<id>')
-def archive_insert_rename(type = None, id = None):
+def web_archive_insert_rename(type = None, id = None):
     try:
-        check_auth()
+        auth_check()
     except Exception as e:
         return flask.redirect(str(e))
 
@@ -360,10 +344,9 @@ def archive_insert_rename(type = None, id = None):
 
     return flask.redirect(flask.url_for('archive'))
 
-@app.route('/archive/batch', methods = ['POST'])
-def archive_batch():
+def web_archive_batch():
     try:
-        check_auth()
+        auth_check()
     except Exception as e:
         return flask.redirect(str(e))
 
@@ -393,10 +376,9 @@ def archive_batch():
         headers = { 'Content-Disposition': 'attachment;filename=batch.txt' }
     )
 
-@app.route('/archive/comments')
-def archive_comments():
+def web_archive_comments():
     try:
-        check_auth()
+        auth_check()
     except Exception as e:
         return flask.redirect(str(e))
 
@@ -415,10 +397,9 @@ def archive_comments():
     archive_comments.seek(0)
     return flask.send_file(archive_comments, mimetype = 'application/zip', as_attachment = True, attachment_filename = 'archive_comments.zip')
 
-@app.route('/archive/config')
-def archive_config():
+def web_archive_config():
     try:
-        check_auth()
+        auth_check()
     except Exception as e:
         return flask.redirect(str(e))
 
@@ -460,246 +441,3 @@ def archive_config():
         mimetype = 'text/plain',
         headers = { 'Content-Disposition': 'attachment;filename=config.txt' }
     )
-
-@app.route('/api/videos/<channel>/<video>/play')
-def video_play(channel = None, video = None):
-    try:
-        check_auth()
-    except Exception as e:
-        return flask.jsonify(False)
-
-    if channel is not None and video is not None:
-        db = get_db()
-        if video not in db[flask.session['user']['id']][channel]['played']:
-            db[flask.session['user']['id']][channel]['played'][video] = datetime.datetime.utcnow().replace(microsecond = 0, tzinfo = datetime.timezone.utc).isoformat();
-            update_db(db)
-
-        return flask.jsonify(True)
-
-@app.route('/api/videos/<channel>/<video>/unplay')
-def video_unplay(channel = None, video = None):
-    try:
-        check_auth()
-    except Exception as e:
-        return flask.jsonify(False)
-
-    if channel is not None and video is not None:
-        db = get_db()
-        if video in db[flask.session['user']['id']][channel]['played']:
-            db[flask.session['user']['id']][channel]['played'].pop(video)
-            update_db(db)
-
-        return flask.jsonify(True)
-
-@app.route('/api/videos/<channel>/<video>/archive')
-def video_archive(channel = None, video = None):
-    try:
-        check_auth()
-    except Exception as e:
-        return flask.jsonify(False)
-
-    if channel is not None and video is not None:
-        db = get_db()
-        archive = None
-        for playlist in db_get_archives():
-            if playlist['contentDetails']['itemCount'] < 5000:
-                archive = playlist
-                break
-
-        if archive is None:
-            archive = yt_create_archive()
-
-        if yt_insert_to_playlist(video, archive['id']):
-            db[flask.session['user']['id']][channel]['archived'][video] = archive['id']
-            update_db(db)
-            return flask.jsonify(True)
-        else:
-            return flask.jsonify(False)
-
-@app.route('/api/videos/<channel>/<video>/unarchive')
-def video_unarchive(channel = None, video = None):
-    try:
-        check_auth()
-    except Exception as e:
-        return flask.jsonify(False)
-
-    if channel is not None and video is not None:
-        db = get_db()
-        if video in db[flask.session['user']['id']][channel]['archived']:
-            if yt_remove_from_playlist(video, db[flask.session['user']['id']][channel]['archived'][video]):
-                db[flask.session['user']['id']][channel]['archived'].pop(video)
-                update_db(db)
-            else:
-                return flask.jsonify(False)
-
-        return flask.jsonify(True)
-
-@app.route('/api/videos/<channel>/<video>/rate')
-def video_rate(channel = None, video = None):
-    try:
-        check_auth()
-    except Exception as e:
-        return flask.jsonify(False)
-
-    rating = flask.request.args.get('rating', None)
-
-    if channel is not None and video is not None and (
-        rating == 'like' or rating == 'dislike' or rating == 'none'
-    ):
-        yt_get_client().videos().rate(id = video, rating = rating).execute()
-        return flask.jsonify(True)
-
-@app.route('/api/videos/<channel>/<video>/playlists')
-def video_playlists(channel = None, video = None):
-    try:
-        check_auth()
-    except Exception as e:
-        return flask.jsonify(False)
-
-    data = flask.request.args.get('data', None)
-
-    if channel is not None and video is not None and data is not None:
-        client = yt_get_client()
-
-        for playlist_id, include in json.loads(urllib.parse.unquote(data)).items():
-            if include:
-                client.playlistItems().insert(
-                    body = build_resource({
-                        'snippet.playlistId': playlist_id,
-                        'snippet.resourceId.kind': 'youtube#video',
-                        'snippet.resourceId.videoId': video
-                    }),
-                    part = 'snippet'
-                ).execute()
-            else:
-                kwargs = {
-                    'part': 'snippet', 'maxResults': 50,
-                    'playlistId': playlist_id
-                }
-
-                while True:
-                    response = client.playlistItems().list(**kwargs).execute()
-
-                    for item in response['items']:
-                        if item['snippet']['resourceId']['videoId'] == video:
-                            client.playlistItems().delete(id = item['id']).execute()
-                            break
-
-                    if 'nextPageToken' not in response:
-                        break
-                    else:
-                        kwargs['pageToken'] = response['nextPageToken']
-
-        return flask.jsonify(True)
-
-@app.route('/api/videos/<channel>/<video>/subscribe')
-def video_subscribe(channel = None, video = None):
-    try:
-        check_auth()
-    except Exception as e:
-        return flask.jsonify(False)
-
-    if channel is not None and video is not None:
-        yt_get_client().subscriptions().insert(
-            body = build_resource({
-                'snippet.resourceId.kind': 'youtube#channel',
-                'snippet.resourceId.channelId': channel
-            }),
-            part = 'snippet'
-        ).execute()
-
-        return flask.jsonify(True)
-
-@app.route('/api/videos/<channel>/<video>/unsubscribe')
-def video_unsubscribe(channel = None, video = None):
-    try:
-        check_auth()
-    except Exception as e:
-        return flask.jsonify(False)
-
-    if channel is not None and video is not None:
-        for subscription in yt_get_subscriptions():
-            if subscription['snippet']['resourceId']['channelId'] == channel:
-                yt_get_client().subscriptions().delete(
-                    id = subscription['id']
-                ).execute()
-
-        return flask.jsonify(True)
-
-@app.route('/api/videos/<channel>/<video>/comments')
-def video_comments(channel = None, video = None):
-    try:
-        check_auth()
-    except Exception as e:
-        return flask.jsonify(False)
-
-    if channel is not None and video is not None:
-        comments = yt_get_comments(video)
-
-        return flask.Response(json.dumps(comments, indent = 2, sort_keys = True),
-            mimetype = 'application/json',
-            headers = { 'Content-Disposition': 'attachment;filename=' + video + '.comments.json' }
-        )
-
-@app.route('/authorize')
-def authorize():
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE, scopes = SCOPES
-    )
-    flow.redirect_uri = flask.url_for('oauth2callback', _external = True)
-
-    authorization_url, state = flow.authorization_url(
-        access_type = 'offline',
-        include_granted_scopes = 'true'
-    )
-
-    flask.session['state'] = state
-
-    return flask.redirect(authorization_url)
-
-@app.route('/oauth2callback')
-def oauth2callback():
-    state = flask.session['state']
-
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        CLIENT_SECRETS_FILE, scopes = SCOPES, state = state
-    )
-    flow.redirect_uri = flask.url_for('oauth2callback', _external = True)
-
-    authorization_response = flask.request.url
-    flow.fetch_token(authorization_response = authorization_response)
-
-    credentials = flow.credentials
-    flask.session['credentials'] = {
-        'token': credentials.token,
-        'refresh_token': credentials.refresh_token,
-        'token_uri': credentials.token_uri,
-        'client_id': credentials.client_id,
-        'client_secret': credentials.client_secret,
-        'scopes': credentials.scopes
-    }
-    flask.session['user'] = yt_get_user()
-
-    db = get_db()
-    if flask.session['user']['id'] not in db:
-        db[flask.session['user']['id']] = {}
-    update_db(db)
-
-    return flask.redirect(flask.url_for('index'))
-
-def check_auth():
-    if 'credentials' not in flask.session:
-        raise Exception('authorize')
-    else:
-        if 'token' in flask.session['credentials']:
-            base_url = 'https://www.googleapis.com/oauth2/v3/tokeninfo?access_token='
-            response = requests.get(base_url + flask.session['credentials']['token'])
-            if response.status_code == 400:
-                raise Exception('logout')
-        else:
-            raise Exception('logout')
-
-@app.route('/logout')
-def logout():
-    flask.session.clear()
-    return flask.redirect('')

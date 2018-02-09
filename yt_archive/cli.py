@@ -3,7 +3,7 @@ import os
 
 import click
 
-from yt_archive.web import app
+from yt_archive.app import app
 
 @click.group(name = 'yt_archive')
 @click.version_option(version = '0.1',
