@@ -1,3 +1,9 @@
+"""YouTube module
+
+This module contains application's methods for communicating with
+    YouTube Data API.
+"""
+
 import flask
 import google.oauth2.credentials
 import googleapiclient.discovery
@@ -8,6 +14,15 @@ from yt_archive.db import get_db, db_get_archives, db_get_video
 from yt_archive.helpers import build_resource
 
 def yt_get_client():
+    """Gets YouTube API client.
+
+    Obtains client for communicating with YouTube Data API. Uses authenticated
+        user's credentials.
+
+    Returns:
+        googleapiclient.discovery.Resource: YouTube Data API client.
+    """
+
     credentials = google.oauth2.credentials.Credentials(
         **flask.session['credentials']
     )
@@ -17,6 +32,15 @@ def yt_get_client():
     )
 
 def yt_get_user():
+    """Gets YouTube user information.
+
+    Gets information about authenticated user from YouTube (id, name
+        and thumbnail URL).
+
+    Returns:
+        dict: Information about authenticated YouTube user.
+    """
+
     try:
         client = yt_get_client()
         response = client.channels().list(part = 'snippet', mine = True).execute()
@@ -34,6 +58,18 @@ def yt_get_user():
         }
 
 def yt_get_subscriptions(list_only = False):
+    """Gets YouTube user's subscriptions.
+
+    Gets YouTube channels to which is authenticated user subscribed, sorted
+        alphabetically. Can obtain list (channel and subscription IDs) only.
+
+    Args:
+        list_only (bool): Whether to get list only.
+
+    Returns:
+        dict or list: Subscribed YouTube channels.
+    """
+
     client = yt_get_client()
     kwargs = {
         'part': 'snippet', 'mine': True,
@@ -59,6 +95,17 @@ def yt_get_subscriptions(list_only = False):
         return {} if list_only else []
 
 def yt_create_subscription(channel_id):
+    """Creates YouTube subscription.
+
+    Subscribes authenticated user to given YouTube channel.
+
+    Args:
+        channel_id (str): YouTube channel ID.
+
+    Returns:
+        bool: Whether operation was succesful.
+    """
+
     try:
         yt_get_client().subscriptions().insert(
             body = build_resource({
@@ -73,6 +120,17 @@ def yt_create_subscription(channel_id):
     return True
 
 def yt_remove_subscription(subscription_id):
+    """Removes YouTube subscription.
+
+    Unsubscribes authenticated user from given YouTube channel.
+
+    Args:
+        subscription_id (str): YouTube subscription ID.
+
+    Returns:
+        bool: Whether operation was succesful.
+    """
+
     try:
         client.subscriptions().delete(
             id = subscription_id
@@ -83,6 +141,20 @@ def yt_remove_subscription(subscription_id):
     return True
 
 def yt_get_channel(part, channel_id = None, user = None):
+    """Gets YouTube channel.
+
+    Gets YouTube channel by its ID or corresponding user name.
+
+    Args:
+        part (str): Comma separated list of parts which should YouTube Data API
+            return. See `https://developers.google.com/youtube/v3/docs/channels/list#parameters <https://developers.google.com/youtube/v3/docs/channels/list#parameters>`_.
+        channel_id (Optional[str]): YouTube channel ID.
+        user (Optional[str]): YouTube user name.
+
+    Returns:
+        dict: YouTube channel.
+    """
+
     client = yt_get_client()
     response = None
 
@@ -103,6 +175,18 @@ def yt_get_channel(part, channel_id = None, user = None):
     return response['items'][0]
 
 def yt_get_channel_videos(channel_id):
+    """Gets YouTube channel videos.
+
+    Gets all uploaded videos for given YouTube channel. Includes information
+        whether they were ``played`` or ``archived`` from the database.
+
+    Args:
+        channel_id (str): YouTube channel ID.
+
+    Returns:
+        list: YouTube videos uploaded by given channel.
+    """
+
     db = get_db()
     client = yt_get_client()
 
@@ -136,6 +220,18 @@ def yt_get_channel_videos(channel_id):
         return []
 
 def yt_get_video(video_id):
+    """Gets YouTube video.
+
+    Gets information about YouTube video including its rating, playlists,
+        comments and data from the database (``played``, ``archived``).
+
+    Args:
+        video_id (str): YouTube video ID.
+
+    Returns:
+        dict: YouTube video.
+    """
+
     db = get_db()
     client = yt_get_client()
 
@@ -168,6 +264,20 @@ def yt_get_video(video_id):
     return video
 
 def yt_get_comments(video_id):
+    """Gets YouTube video comments.
+
+    Gets all top level comments and their replies for given YouTube video.
+
+    Args:
+        video_id (str): YouTube video ID.
+
+    Returns:
+        list: YouTube video comments.
+
+    See also:
+        :func:`~yt_archive.youtube.yt_get_comment_replies()`
+    """
+
     client = yt_get_client()
     kwargs = {
         'part': 'snippet', 'videoId': video_id, 'maxResults': 100
@@ -202,6 +312,17 @@ def yt_get_comments(video_id):
     return threads
 
 def yt_get_comment_replies(comment_id):
+    """Gets YouTube video comment replies.
+
+    Gets all replies to the given YouTube video's top level comment.
+
+    Args:
+        comment_id (str): YouTube top level comment ID.
+
+    Returns:
+        list: YouTube video comment replies.
+    """
+
     client = yt_get_client()
     kwargs = {
         'part': 'snippet', 'maxResults': 100,
@@ -227,6 +348,15 @@ def yt_get_comment_replies(comment_id):
             kwargs['pageToken'] = response['nextPageToken']
 
 def yt_get_playlists():
+    """Gets YouTube playlists.
+
+    Gets all authenticated user's YouTube playlists in form of
+        ``id``: ``{ 'title': ..., 'videos': ... }``.
+
+    Returns:
+        dict: YouTube playlists.
+    """
+
     client = yt_get_client()
     kwargs = {
         'part': 'snippet', 'mine': True, 'maxResults': 50
@@ -257,6 +387,14 @@ def yt_get_playlists():
     return playlists
 
 def yt_get_playlist(playlist_id):
+    """Gets YouTube playlist.
+
+    Gets information about single YouTube playlist.
+
+    Returns:
+        dict: YouTube playlist.
+    """
+
     client = yt_get_client()
 
     try:
@@ -269,6 +407,18 @@ def yt_get_playlist(playlist_id):
     return response['items'][0]
 
 def yt_get_playlist_items(playlist_id, video_ids_only = False):
+    """Gets YouTube playlist's videos.
+
+    Gets videos contained in given YouTube playlist. Can obtain IDs only.
+
+    Args:
+        playlist_id (str): YouTube playlist ID.
+        video_ids_only (bool): Whether to get IDs only.
+
+    Returns:
+        list: YouTube playlist videos or video IDs.
+    """
+
     part = 'contentDetails' if video_ids_only else 'snippet'
     kwargs = {
         'part': part, 'maxResults': 50,
@@ -294,6 +444,18 @@ def yt_get_playlist_items(playlist_id, video_ids_only = False):
         return []
 
 def yt_insert_to_playlist(video_id, playlist_id):
+    """Inserts YouTube video to playlist.
+
+    Inserts given YouTube video to YouTube playlist.
+
+    Args:
+        video_id (str): YouTube video ID.
+        playlist_id (str): YouTube playlist ID.
+
+    Returns:
+        bool: Whether operation was succesful.
+    """
+
     try:
         yt_get_client().playlistItems().insert(
             body = build_resource({
@@ -309,6 +471,18 @@ def yt_insert_to_playlist(video_id, playlist_id):
     return True
 
 def yt_remove_from_playlist(video_id, playlist_id):
+    """Removes YouTube video from playlist.
+
+    Removes given YouTube video from YouTube playlist.
+
+    Args:
+        video_id (str): YouTube video ID.
+        playlist_id (str): YouTube playlist ID.
+
+    Returns:
+        bool: Whether operation was succesful.
+    """
+
     client =  yt_get_client()
     kwargs = {
         'part': 'snippet', 'maxResults': 50,
@@ -332,6 +506,15 @@ def yt_remove_from_playlist(video_id, playlist_id):
         return False
 
 def yt_create_playlist():
+    """Creates YouTube playlist.
+
+    Creates new YouTube private playlist to be used as application's archive.
+        Names it using template: *User's Archive #N*.
+
+    Returns:
+        dict: Created YouTube playlist.
+    """
+
     try:
         return yt_get_client().playlists().insert(
             body = build_resource({
@@ -348,6 +531,9 @@ def yt_create_playlist():
         return {}
 
 def yt_rename_playlist(playlist_id, name):
+    """Renames YouTube playlist.
+    """
+
     try:
         yt_get_client().playlists().update(
             body = build_resource({

@@ -1,4 +1,21 @@
+"""Helpers module
+
+This module contains helper functions.
+"""
+
 def build_resource(properties):
+    """Builds YouTube resource.
+
+    Builds YouTube resource for usage with YouTube Data API. Source:
+        `YouTube Data API Reference <https://developers.google.com/youtube/v3/docs/>`_.
+
+    Args:
+        properties (dict): Compact resource representation.
+
+    Returns:
+        dict: Expanded resource ready for use.
+    """
+
     resource = {}
 
     for p in properties:
@@ -40,6 +57,18 @@ def build_resource(properties):
     return resource
 
 def allowed_file(filename):
+    """Checks uploaded file extension.
+
+    Checks if file is allowed to upload (by its extension only). Source:
+        `Flask Documentation <http://flask.pocoo.org/docs/0.12/patterns/fileuploads/>`_.
+
+    Args:
+        filename (str): File name.
+
+    Returns:
+        bool: Whether file is allowed to upload.
+    """
+
     return not ('.' in filename and \
             filename.rsplit('.', 1)[1].lower() in set([
                 'html', 'htm', 'xhtml', 'php'

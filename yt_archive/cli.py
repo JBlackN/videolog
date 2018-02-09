@@ -1,3 +1,8 @@
+"""CLI module
+
+This module contains application's entry point and its command line interface.
+"""
+
 import json
 import os
 
@@ -30,4 +35,8 @@ def run(ctx, host, port, debug):
     app.run(host = host, port = port, debug = debug)
 
 def main():
+    """Runs app.
+
+    Runs the application.
+    """
     cli(obj = {})

@@ -1,3 +1,8 @@
+"""API module
+
+This module contains application's API routes handlers.
+"""
+
 import datetime
 import json
 import urllib
@@ -14,6 +19,18 @@ from yt_archive.youtube import yt_create_playlist
 from yt_archive.youtube import yt_insert_to_playlist, yt_remove_from_playlist
 
 def api_video_play(channel = None, video = None):
+    """API video play route handler.
+
+    Handles marking video as played.
+
+    Args:
+        channel (Optional[str]): YouTube channel ID.
+        video (Optional[str]): YouTube video ID.
+
+    Returns:
+        flask.Response: Whether operation has succeeded (bool in JSON).
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -34,6 +51,18 @@ def api_video_play(channel = None, video = None):
         return flask.jsonify(True)
 
 def api_video_unplay(channel = None, video = None):
+    """API video unplay route handler.
+
+    Handles marking video as unplayed.
+
+    Args:
+        channel (Optional[str]): YouTube channel ID.
+        video (Optional[str]): YouTube video ID.
+
+    Returns:
+        flask.Response: Whether operation has succeeded (bool in JSON).
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -48,6 +77,18 @@ def api_video_unplay(channel = None, video = None):
         return flask.jsonify(True)
 
 def api_video_archive(channel = None, video = None):
+    """API video archive route handler.
+
+    Handles video archiving.
+
+    Args:
+        channel (Optional[str]): YouTube channel ID.
+        video (Optional[str]): YouTube video ID.
+
+    Returns:
+        flask.Response: Whether operation has succeeded (bool in JSON).
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -72,6 +113,18 @@ def api_video_archive(channel = None, video = None):
             return flask.jsonify(False)
 
 def api_video_unarchive(channel = None, video = None):
+    """API video unarchive route handler.
+
+    Handles video unarchiving.
+
+    Args:
+        channel (Optional[str]): YouTube channel ID.
+        video (Optional[str]): YouTube video ID.
+
+    Returns:
+        flask.Response: Whether operation has succeeded (bool in JSON).
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -92,6 +145,18 @@ def api_video_unarchive(channel = None, video = None):
         return flask.jsonify(True)
 
 def api_video_rate(channel = None, video = None):
+    """API video rating route handler.
+
+    Handles video rating.
+
+    Args:
+        channel (Optional[str]): YouTube channel ID.
+        video (Optional[str]): YouTube video ID.
+
+    Returns:
+        flask.Response: Whether operation has succeeded (bool in JSON).
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -106,6 +171,18 @@ def api_video_rate(channel = None, video = None):
         return flask.jsonify(True)
 
 def api_video_playlists(channel = None, video = None):
+    """API video playlists route handler.
+
+    Handles updating video's playlists.
+
+    Args:
+        channel (Optional[str]): YouTube channel ID.
+        video (Optional[str]): YouTube video ID.
+
+    Returns:
+        flask.Response: Whether operation has succeeded (bool in JSON).
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -123,6 +200,18 @@ def api_video_playlists(channel = None, video = None):
         return flask.jsonify(True)
 
 def api_video_subscribe(channel = None, video = None):
+    """API video subscribe route handler.
+
+    Handles subscribing to video's channel.
+
+    Args:
+        channel (Optional[str]): YouTube channel ID.
+        video (Optional[str]): YouTube video ID.
+
+    Returns:
+        flask.Response: Whether operation has succeeded (bool in JSON).
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -137,6 +226,18 @@ def api_video_subscribe(channel = None, video = None):
     return flask.jsonify(False)
 
 def api_video_unsubscribe(channel = None, video = None):
+    """API video unsubscribe route handler.
+
+    Handles unsubscribing from video's channel.
+
+    Args:
+        channel (Optional[str]): YouTube channel ID.
+        video (Optional[str]): YouTube video ID.
+
+    Returns:
+        flask.Response: Whether operation has succeeded (bool in JSON).
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -153,6 +254,18 @@ def api_video_unsubscribe(channel = None, video = None):
     return flask.jsonify(False)
 
 def api_video_comments(channel = None, video = None):
+    """API video comments route handler.
+
+    Returns JSON file containing video's comments.
+
+    Args:
+        channel (Optional[str]): YouTube channel ID.
+        video (Optional[str]): YouTube video ID.
+
+    Returns:
+        flask.Response: Comments (JSON file).
+    """
+
     try:
         auth_check()
     except Exception as e:

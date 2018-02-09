@@ -1,3 +1,8 @@
+"""Web module
+
+This module contains application's web routes handlers.
+"""
+
 import io
 import json
 import random
@@ -21,6 +26,14 @@ from yt_archive.youtube import yt_create_playlist, yt_rename_playlist
 from yt_archive.youtube import yt_insert_to_playlist
 
 def web_index():
+    """Index route handler.
+
+    Requests sync of archives with YouTube and redirects to videos list view.
+
+    Returns:
+        flask.Response: Index page.
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -32,6 +45,30 @@ def web_index():
 
 
 def web_videos(user = None, tracks = [], subs = [], channel = None, video = None):
+    """Videos route handler.
+
+    Renders videos list or video detail view.
+
+    Uses GET query parameters ``archived`` and ``played`` for video list filtering.
+
+    Args:
+        user (Optional[dict]): User object (id, name, thumbnail).
+        tracks (Optional[list]): List of tracked channels.
+        subs (Optional[list]): List of subscribed channels.
+        channel (Optional[str]): Viewed channel.
+        video (Optional[str]): Viewed video.
+
+    Returns:
+        flask.Response: Videos list or video detail view page.
+
+    See also:
+        :func:`~yt_archive.web.web_videos_filter()`,
+        :func:`~yt_archive.web.web_videos_random_unplayed()`,
+        :func:`~yt_archive.web.web_videos_next_unplayed()`,
+        :func:`~yt_archive.web.web_videos_random_archived()`,
+        :func:`~yt_archive.web.web_videos_random_all()`
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -69,6 +106,21 @@ def web_videos(user = None, tracks = [], subs = [], channel = None, video = None
             )
 
 def web_videos_filter(channel, tracks, archived, played):
+    """Filters video list.
+
+    First loads all tracked videos or videos from selected channel. Then
+        filters those by 'archived' and/or 'played'.
+
+    Args:
+        channel (str): YouTube channel ID (or 'all').
+        tracks (list): List of tracked channels.
+        archived (str): Whether video is archived ('true' or 'false').
+        played (str): Whether video has been played ('true' or 'false').
+
+    Returns:
+        list: Filtered list of videos.
+    """
+
     videos = []
 
     if channel == 'all':
@@ -111,6 +163,18 @@ def web_videos_filter(channel, tracks, archived, played):
     return videos
 
 def web_videos_random_unplayed(channel):
+    """Play random unplayed video.
+
+    Chooses random unplayed video from selected channel and redirects to its
+        detail page view.
+
+    Args:
+        channel (str): YouTube channel ID.
+
+    Returns:
+        flask.Response: Selected video detail view.
+    """
+
     try:
         choice = random.choice([
             video['snippet']['resourceId']['videoId']
@@ -127,6 +191,18 @@ def web_videos_random_unplayed(channel):
     ))
 
 def web_videos_next_unplayed(channel):
+    """Play next unplayed video.
+
+    Chooses next (chronologically) unplayed video from selected channel and
+        redirects to its detail page view.
+
+    Args:
+        channel (str): YouTube channel ID.
+
+    Returns:
+        flask.Response: Selected video detail view.
+    """
+
     try:
         choice = sorted([
             video
@@ -143,6 +219,18 @@ def web_videos_next_unplayed(channel):
     ))
 
 def web_videos_random_archived(channel):
+    """Play random archived video.
+
+    Chooses random archived video from selected channel and redirects to its
+        detail page view.
+
+    Args:
+        channel (str): YouTube channel ID.
+
+    Returns:
+        flask.Response: Selected video detail view.
+    """
+
     try:
         choice = random.choice([
             video['snippet']['resourceId']['videoId']
@@ -159,6 +247,18 @@ def web_videos_random_archived(channel):
     )
 
 def web_videos_random_all(channel):
+    """Play random video.
+
+    Chooses random video from selected channel and redirects to its detail
+        page view.
+
+    Args:
+        channel (str): YouTube channel ID.
+
+    Returns:
+        flask.Response: Selected video detail view.
+    """
+
     try:
         choice = random.choice([
             video['snippet']['resourceId']['videoId']
@@ -174,6 +274,22 @@ def web_videos_random_all(channel):
     )
 
 def web_channels(user = None, subs = None, tracks = [], tracking = False, error = False):
+    """Channels route handler.
+
+    Renders channel management page.
+
+    Args:
+        user (Optional[dict]): User object (id, name, thumbnail).
+        subs (Optional[list]): List of subscribed channels.
+        tracks (Optional[list]): List of tracked channels.
+        tracking (Optional[bool]): Whether user is viewing
+            'Track using connected account' page.
+        error (Optional[bool]): Whether error has occured.
+
+    Returns:
+        flask.Response: Channel management pages.
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -188,6 +304,22 @@ def web_channels(user = None, subs = None, tracks = [], tracking = False, error 
         tracking = tracking, error = error)
 
 def web_channels_track(user = None, subs = [], tracks = [], tracking = True, error = False):
+    """Channels track route handler.
+
+    Renders tracking using connected YouTube account page.
+
+    Args:
+        user (Optional[dict]): User object (id, name, thumbnail).
+        subs (Optional[list]): List of subscribed channels.
+        tracks (Optional[list]): List of tracked channels.
+        tracking (Optional[bool]): Whether user is viewing
+            'Track using connected account' page.
+        error (Optional[bool]): Whether error has occured.
+
+    Returns:
+        flask.Response: Channel management page.
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -199,6 +331,21 @@ def web_channels_track(user = None, subs = [], tracks = [], tracking = True, err
         tracking = tracking, error = error)
 
 def web_channels_update():
+    """Handles channel tracking.
+
+    Tracks or untracks YouTube channels using connected account or by user
+        query. Then redirects to channels management page.
+
+    Uses GET query parameters ``tracks`` and ``query``.
+
+    Returns:
+        flask.Response: Channels management page.
+
+    See also:
+        :func:`~yt_archive.web.web_channels_update_tracks()`,
+        :func:`~yt_archive.web.web_channels_update_query()`
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -220,6 +367,14 @@ def web_channels_update():
     return flask.redirect('channels')
 
 def web_channels_update_tracks(tracks):
+    """Handles channel tracking using connected account.
+
+    Tracks or untracks YouTube channels using connected account.
+
+    Args:
+        tracks (string): URL encoded JSON data (``channel_id``: ``tracked?``).
+    """
+
     db = get_db()
     user_id = flask.session['user']['id']
 
@@ -236,6 +391,15 @@ def web_channels_update_tracks(tracks):
     update_db(db)
 
 def web_channels_update_query(query):
+    """Handles channel tracking by user query.
+
+    Tracks or untracks YouTube channels by user query.
+
+    Args:
+        query (string): URL encoded JSON data (``type``: ``url`` or ``id``,
+            ``value``: ``value``).
+    """
+
     db = get_db()
     query_data = json.loads(urllib.parse.unquote(query))
     user_id = flask.session['user']['id']
@@ -271,6 +435,20 @@ def web_channels_update_query(query):
     update_db(db)
 
 def web_channels_subscriptions():
+    """Handles channel subscriptions.
+
+    Subscribes user to or unsubscribes user from given YouTube channel,
+        then redirects to given page. Time delay is needed, because of
+        YouTube Data API delays.
+
+    Uses GET query parameter ``update`` (URL encoded JSON data). Its data
+        contain ``id`` (YouTube subscription ID), ``subscribe`` (flag whether
+        to subscribe or unsubscribe) and ``redirect`` (where to redirect after).
+
+    Returns:
+        flask.Response: Channels management or video detail view page.
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -293,6 +471,14 @@ def web_channels_subscriptions():
     return flask.redirect('channels')
 
 def web_archive():
+    """Archive route handler.
+
+    Renders archive management view.
+
+    Returns:
+        flask.Response: Archive management view.
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -302,6 +488,26 @@ def web_archive():
         archives = db_get_archives())
 
 def web_archive_insert_rename(type = None, id = None):
+    """Handles archive management.
+
+    Inserts video to archive, imports entire playlist into archive or
+        renames given archive.
+
+    Uses GET query parameter ``name`` (new given archive name).
+
+    Args:
+        type (Optional[str]): 'video', 'playlist' or 'rename'.
+        id (Optional[str]): YouTube video or playlist ID.
+
+    Returns:
+        flask.Response: Archive management view.
+
+    See also:
+        :func:`~yt_archive.web.web_archive_insert_video()`,
+        :func:`~yt_archive.web.web_archive_import_playlist()`,
+        :func:`~yt_archive.web.web_archive_rename()`
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -318,6 +524,15 @@ def web_archive_insert_rename(type = None, id = None):
     return flask.redirect(flask.url_for('archive'))
 
 def web_archive_insert_video(id):
+    """Inserts video to archive.
+
+    Inserts video to the first available archive. Creates new archive if
+        all are full.
+
+    Args:
+        id (str): YouTube video ID.
+    """
+
     db = get_db()
     user_id = flask.session['user']['id']
 
@@ -343,6 +558,15 @@ def web_archive_insert_video(id):
         update_db(db)
 
 def web_archive_import_playlist(id):
+    """Imports playlist to archive.
+
+    Imports entire playlist to the first available archive. Creates new archive
+        if all are full.
+
+    Args:
+        id (str): YouTube playlist ID.
+    """
+
     db = get_db()
     user_id = flask.session['user']['id']
 
@@ -369,11 +593,31 @@ def web_archive_import_playlist(id):
             update_db(db)
 
 def web_archive_rename(id, name):
+    """Renames archive.
+
+    Renames given archive. Time delay is needed because of YouTube Data API
+        delays.
+
+    Args:
+        id (str): YouTube playlist ID.
+        name (str): New archive name.
+    """
+
     if name is not None:
         yt_rename_playlist(id, name)
         time.sleep(5)
 
 def web_archive_batch():
+    """Generates youtube-dl batch file.
+
+    Generates batch file for youtube-dl to download archived videos. Optionally
+        uses uploaded youtube-dl ``archive`` file to only include videos not
+        yet downloaded.
+
+    Returns:
+        flask.Response: youtube-dl batch file.
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -406,6 +650,15 @@ def web_archive_batch():
     )
 
 def web_archive_comments():
+    """Downloads comments.
+
+    Downloads archived videos' comments. Places them to subdirectories by
+        YouTube channel ID and generates ZIP archive.
+
+    Returns:
+        flask.Response: ZIP archive of archived videos' comments.
+    """
+
     try:
         auth_check()
     except Exception as e:
@@ -430,6 +683,15 @@ def web_archive_comments():
     )
 
 def web_archive_config():
+    """Generates youtube-dl configuration file.
+
+    Generates configuration file for youtube-dl. Gets values from GET query
+        parameters.
+
+    Returns:
+        flask.Response: youtube-dl configuration file.
+    """
+
     try:
         auth_check()
     except Exception as e:

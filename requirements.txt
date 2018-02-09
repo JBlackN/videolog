@@ -1,9 +1,12 @@
+alabaster==0.7.10
 attrs==17.4.0
+Babel==2.5.3
 betamax==0.8.0
 cachetools==2.0.1
 certifi==2018.1.18
 chardet==3.0.4
 click==6.7
+docutils==0.14
 Flask==0.12.2
 flexmock==0.10.2
 google-api-python-client==1.6.5
@@ -12,6 +15,7 @@ google-auth-httplib2==0.0.3
 google-auth-oauthlib==0.2.0
 httplib2==0.10.3
 idna==2.6
+imagesize==0.7.1
 itsdangerous==0.24
 Jinja2==2.10
 MarkupSafe==1.0
@@ -21,11 +25,16 @@ pluggy==0.6.0
 py==1.5.2
 pyasn1==0.4.2
 pyasn1-modules==0.2.1
+Pygments==2.2.0
 pytest==3.4.0
+pytz==2018.3
 requests==2.18.4
 requests-oauthlib==0.8.0
 rsa==3.4.2
 six==1.11.0
+snowballstemmer==1.2.1
+Sphinx==1.6.7
+sphinxcontrib-websupport==1.0.1
 uritemplate==3.0.0
 urllib3==1.22
 Werkzeug==0.14.1

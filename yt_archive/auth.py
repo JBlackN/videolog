@@ -1,3 +1,8 @@
+"""Auth module
+
+This module contains application's authorization methods.
+"""
+
 import flask
 import google_auth_oauthlib.flow
 import requests
@@ -7,6 +12,13 @@ from yt_archive.db import get_db, update_db
 from yt_archive.youtube import yt_get_user
 
 def auth_authorize():
+    """Authorization route handler.
+
+    Redirects to Google authorization page.
+
+    Returns:
+        flask.Response: Google authorization page.
+    """
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         CLIENT_SECRETS_FILE, scopes = SCOPES
     )
@@ -22,6 +34,14 @@ def auth_authorize():
     return flask.redirect(authorization_url)
 
 def auth_oauth2callback():
+    """OAuth 2.0 callback route handler.
+
+    Completes authorization process (stores obtained credentials, gets user
+        information and registers him if needed) and redirects to index.
+
+    Returns:
+        flask.Response: Index page.
+    """
     state = flask.session['state']
 
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
@@ -51,6 +71,14 @@ def auth_oauth2callback():
     return flask.redirect(flask.url_for('index'))
 
 def auth_check():
+    """Authorization checks provider.
+
+    Checks user credentials and token validity. Redirects back to authorization.
+        if needed.
+
+    Raises:
+        Exception: Redirection route ('authorize' or 'logout')
+    """
     if 'credentials' not in flask.session:
         raise Exception('authorize')
     else:
@@ -63,5 +91,12 @@ def auth_check():
             raise Exception('logout')
 
 def auth_logout():
+    """Logout route handler.
+
+    Handles user logout (clears session and redirects to index = auth).
+
+    Returns:
+        flask.Response: Index page (which then redirects to auth).
+    """
     flask.session.clear()
     return flask.redirect('')

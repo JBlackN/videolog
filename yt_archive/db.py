@@ -1,14 +1,48 @@
+"""DB module
+
+This module contains methods to work with application's simple JSON database.
+"""
+
 import json
 import flask
 
 def get_db():
+    """Gets database.
+
+    Loads database from JSON file.
+
+    Returns:
+        dict: JSON database object.
+    """
+
     return json.load(open('db.json'))
 
 def update_db(db):
+    """Updates database.
+
+    Saves database updates back to the JSON file.
+
+    Args:
+        dict: JSON database object.
+    """
     with open('db.json', 'w') as f:
         json.dump(db, f, indent = 2, sort_keys = True)
 
 def db_get_tracks(sort_by_played = None):
+    """Gets tracked channels.
+
+    Gets tracked channels from the database, either list of YouTube channel IDs
+        or list of entire objects with optional sorting by played percentage and
+        channel title.
+
+    Args:
+        sort_by_played (bool): Whether to sort by played percentage. Can also
+            be ``None``: then return list of IDs only.
+
+    Returns:
+        list: Tracked channels or their IDs.
+    """
+
     from yt_archive.youtube import yt_get_channel
     db = get_db()
 
@@ -44,6 +78,14 @@ def db_get_tracks(sort_by_played = None):
             return sorted(tracks, key = lambda item: item['snippet']['title'])
 
 def db_get_archives():
+    """Gets archives.
+
+    Gets list of archives from the database sorted by date and time created.
+
+    Returns:
+        list: YouTube archives (playlist objects).
+    """
+
     from yt_archive.youtube import yt_get_playlist
     db = get_db()
     archive_ids = set()
@@ -63,6 +105,12 @@ def db_get_archives():
         return archives
 
 def db_update_archives():
+    """Synchronizes archives with YouTube.
+
+    Synchronizes archives in the database with respective YouTube playlists.
+        Works bidirectionally.
+    """
+
     from yt_archive.youtube import yt_get_playlist_items, yt_get_video
     db = get_db()
     user_id = flask.session['user']['id']
@@ -100,6 +148,14 @@ def db_update_archives():
     update_db(db)
 
 def db_get_archived():
+    """Gets archived video IDs.
+
+    Gets archived YouTube video IDs from the database.
+
+    Returns:
+        set: Archived YouTube video IDs.
+    """
+
     db = get_db()
 
     return set([
@@ -109,6 +165,20 @@ def db_get_archived():
     ])
 
 def db_get_video(video_id, channel_id, field = 'played'):
+    """Gets video metadata.
+
+    Gets information whether (when, where) video was played or archived
+        from the database.
+
+    Args:
+        video_id (str): YouTube video ID.
+        channel_id (str): YouTube channel ID.
+        field (Optional[str]): ``played`` or ``archived``.
+
+    Returns:
+        str: ISO8601 timestamp, YouTube playlist ID or ``None``.
+    """
+
     db = get_db()
     user_id = flask.session['user']['id']
 

@@ -1,5 +1,10 @@
 __venv__/
 __pycache__/
 *.pyc
+docs/_build/
+.eggs/
+.pytest_cache/
+yt_archive.egg-info/
 
 client_secret.json
+db.json
