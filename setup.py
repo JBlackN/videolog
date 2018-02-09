@@ -63,8 +63,8 @@ setup(
     },
 
     install_requires = [
-        'click', 'flask', 'google-api-python-client', 'google-auth',
-        'google-auth-httplib2', 'google-auth-oauthlib', 'requests'
+        'click', 'requests', 'flask', 'google-api-python-client',
+        'google-auth-httplib2', 'google-auth-oauthlib', 'google-auth'
     ],
     setup_requires = ['pytest-runner'],
     tests_require = ['pytest', 'flexmock']
