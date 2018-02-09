@@ -14,6 +14,8 @@ Installation
 Client secret
 -------------
 
+**!!! IMPORTANT !!!**
+
 Application uses Youtube Data API with OAuth 2.0, therefore client secret file
 is needed. See guide_ how to obtain it. Place it in application's root directory.
 
