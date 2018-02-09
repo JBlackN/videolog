@@ -28,8 +28,8 @@ def cli(ctx):
 def run(ctx, host, port, debug):
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1' # TODO: rm in production
 
-    if not os.path.isfile('../db.json'):
-        with open('../db.json', 'w') as f:
+    if not os.path.isfile('./db.json'):
+        with open('./db.json', 'w') as f:
             json.dump({}, f, indent = 2, sort_keys = True)
 
     app.run(host = host, port = port, debug = debug)
