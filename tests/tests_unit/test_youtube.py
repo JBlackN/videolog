@@ -7,31 +7,7 @@ from yt_archive.helpers import build_resource
 from yt_archive.youtube import yt_get_user, yt_get_subscriptions
 from yt_archive.youtube import yt_get_channel, yt_get_channel_videos
 
-def yt_test_client(data):
-    kwargs3 = {}
-    for endpoint, data in data.items():
-        resource, method = endpoint.split('.')
-        fixtures = data['fixtures']
-        condition = data.get('condition', 'pageToken')
-
-        if len(fixtures) == 2:
-            kwargs2 = {
-                method: lambda *args, **kwargs: flexmock(
-                    execute = lambda: json.load(open('./tests/fixtures/youtube/' + fixtures[0] + '.json')) if condition not in kwargs else json.load(open('./tests/fixtures/youtube/' + fixtures[1] + '.json'))
-                )
-            }
-        else:
-            kwargs2 = {
-                method: lambda *args, **kwargs: flexmock(
-                    execute = lambda: json.load(open(
-                        './tests/fixtures/youtube/' + fixtures[0] + '.json'
-                    ))
-                )
-            }
-
-        kwargs3[resource] = lambda: flexmock(**kwargs2)
-
-    return flexmock(**kwargs3)
+DB_FIXTURE_PATH = './tests/fixtures/db.json'
 
 def test_yt_get_user():
     import yt_archive.youtube
@@ -117,6 +93,7 @@ def test_yt_get_channel_videos():
         )
     ))
     flexmock(yt_archive.youtube, db_get_video = None)
+    flexmock(yt_archive.youtube, get_db = json.load(open(DB_FIXTURE_PATH)))
 
     result = yt_get_channel_videos('UC_x5XG1OV2P6uZZ5FSM9Ttw')
 
