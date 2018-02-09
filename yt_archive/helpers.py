@@ -1,5 +1,6 @@
 def build_resource(properties):
     resource = {}
+
     for p in properties:
         # Given a key like "snippet.title", split into "snippet" and "title", where
         # "snippet" will be an object and "title" will be a property in that object.
@@ -35,6 +36,7 @@ def build_resource(properties):
                 # For example, the property is "snippet.description", and the resource
                 # already has a "snippet" object.
                 ref = ref[key]
+
     return resource
 
 def allowed_file(filename):

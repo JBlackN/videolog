@@ -10,14 +10,14 @@ import flask
 
 from yt_archive.auth import auth_check
 from yt_archive.db import get_db, update_db
-from yt_archive.db import db_get_archived, db_get_archives, db_get_channels
+from yt_archive.db import db_get_archived, db_get_archives, db_get_tracks
 from yt_archive.db import db_update_archives
-from yt_archive.helpers import allowed_file, build_resource
-from yt_archive.youtube import yt_get_client
-from yt_archive.youtube import yt_get_subscriptions, yt_get_tracks
-from yt_archive.youtube import yt_get_channel_videos, yt_get_playlist_items
+from yt_archive.helpers import allowed_file
+from yt_archive.youtube import yt_get_subscriptions
+from yt_archive.youtube import yt_create_subscription, yt_remove_subscription
+from yt_archive.youtube import yt_get_channel, yt_get_channel_videos, yt_get_playlist_items
 from yt_archive.youtube import yt_get_video, yt_get_comments
-from yt_archive.youtube import yt_create_archive, yt_rename_playlist
+from yt_archive.youtube import yt_create_playlist, yt_rename_playlist
 from yt_archive.youtube import yt_insert_to_playlist
 
 def web_index():
@@ -37,7 +37,7 @@ def web_videos(user = None, tracks = [], subs = [], channel = None, video = None
     except Exception as e:
         return flask.redirect(str(e))
 
-    tracks = yt_get_tracks(sort_by_played = True)
+    tracks = db_get_tracks(sort_by_played = True)
 
     if channel is None:
         if tracks:
@@ -48,113 +48,130 @@ def web_videos(user = None, tracks = [], subs = [], channel = None, video = None
         if video is None:
             archived = flask.request.args.get('archived', 'null')
             played = flask.request.args.get('played', 'null')
-            videos = []
-
-            if channel == 'all':
-                for tracked in tracks:
-                    videos.append(yt_get_channel_videos(tracked['id']))
-                videos = [
-                    item
-                    for sublist in videos
-                    for item in sublist
-                ]
-            else:
-                videos = yt_get_channel_videos(channel)
-
-            if archived == 'true':
-                videos = [
-                    video
-                    for video in videos
-                    if video['archived'] is not None
-                ]
-            elif archived == 'false':
-                videos = [
-                    video
-                    for video in videos
-                    if video['archived'] is None
-                ]
-
-            if played == 'true':
-                videos = [
-                    video
-                    for video in videos
-                    if video['played'] is not None
-                ]
-            elif played == 'false':
-                videos = [
-                    video
-                    for video in videos
-                    if video['played'] is None
-                ]
+            videos = web_videos_filter(channel, tracks, archived, played)
 
             return flask.render_template('index.html', user = flask.session['user'],
                 tracks = tracks, channel = channel,
                 videos = videos, archived = archived, played = played
             )
         elif video == 'random-unplayed':
-            try:
-                choice = random.choice([
-                    video['snippet']['resourceId']['videoId']
-                    for video in yt_get_channel_videos(channel)
-                    if video['played'] is None
-                ])
-            except IndexError:
-                return flask.redirect(flask.url_for('videos',
-                    channel = channel
-                ))
-
-            return flask.redirect(flask.url_for('videos',
-                channel = channel, video = choice
-            ))
+            return web_videos_random_unplayed(channel)
         elif video == 'next-unplayed':
-            try:
-                choice = sorted([
-                    video
-                    for video in yt_get_channel_videos(channel)
-                    if video['played'] is None
-                ], key = lambda video: video['snippet']['publishedAt'])[0]
-            except IndexError:
-                return flask.redirect(flask.url_for('videos',
-                    channel = channel
-                ))
-
-            return flask.redirect(flask.url_for('videos',
-                channel = channel, video = choice['snippet']['resourceId']['videoId']
-            ))
+            return web_videos_next_unplayed(channel)
         elif video == 'random-archived':
-            try:
-                choice = random.choice([
-                    video['snippet']['resourceId']['videoId']
-                    for video in yt_get_channel_videos(channel)
-                    if video['archived'] is not None
-                ])
-            except IndexError:
-                return flask.redirect(flask.url_for('videos',
-                    channel = channel
-                ))
-
-            return flask.redirect(flask.url_for('videos',
-                channel = channel, video = choice)
-            )
+            return web_videos_random_archived(channel)
         elif video == 'random-all':
-            try:
-                choice = random.choice([
-                    video['snippet']['resourceId']['videoId']
-                    for video in yt_get_channel_videos(channel)
-                ])
-            except IndexError:
-                return flask.redirect(flask.url_for('videos',
-                    channel = channel
-                ))
-
-            return flask.redirect(flask.url_for('videos',
-                channel = channel, video = choice)
-            )
+            return web_videos_random_all(channel)
         else:
             return flask.render_template('index.html', user = flask.session['user'],
                 tracks = tracks, subs = yt_get_subscriptions(list_only = True),
                 channel = channel, video = yt_get_video(video)
             )
+
+def web_videos_filter(channel, tracks, archived, played):
+    videos = []
+
+    if channel == 'all':
+        for tracked in tracks:
+            videos.append(yt_get_channel_videos(tracked['id']))
+        videos = [
+            item
+            for sublist in videos
+            for item in sublist
+        ]
+    else:
+        videos = yt_get_channel_videos(channel)
+
+    if archived == 'true':
+        videos = [
+            video
+            for video in videos
+            if video['archived'] is not None
+        ]
+    elif archived == 'false':
+        videos = [
+            video
+            for video in videos
+            if video['archived'] is None
+        ]
+
+    if played == 'true':
+        videos = [
+            video
+            for video in videos
+            if video['played'] is not None
+        ]
+    elif played == 'false':
+        videos = [
+            video
+            for video in videos
+            if video['played'] is None
+        ]
+
+    return videos
+
+def web_videos_random_unplayed(channel):
+    try:
+        choice = random.choice([
+            video['snippet']['resourceId']['videoId']
+            for video in yt_get_channel_videos(channel)
+            if video['played'] is None
+        ])
+    except IndexError:
+        return flask.redirect(flask.url_for('videos',
+            channel = channel
+        ))
+
+    return flask.redirect(flask.url_for('videos',
+        channel = channel, video = choice
+    ))
+
+def web_videos_next_unplayed(channel):
+    try:
+        choice = sorted([
+            video
+            for video in yt_get_channel_videos(channel)
+            if video['played'] is None
+        ], key = lambda video: video['snippet']['publishedAt'])[0]
+    except IndexError:
+        return flask.redirect(flask.url_for('videos',
+            channel = channel
+        ))
+
+    return flask.redirect(flask.url_for('videos',
+        channel = channel, video = choice['snippet']['resourceId']['videoId']
+    ))
+
+def web_videos_random_archived(channel):
+    try:
+        choice = random.choice([
+            video['snippet']['resourceId']['videoId']
+            for video in yt_get_channel_videos(channel)
+            if video['archived'] is not None
+        ])
+    except IndexError:
+        return flask.redirect(flask.url_for('videos',
+            channel = channel
+        ))
+
+    return flask.redirect(flask.url_for('videos',
+        channel = channel, video = choice)
+    )
+
+def web_videos_random_all(channel):
+    try:
+        choice = random.choice([
+            video['snippet']['resourceId']['videoId']
+            for video in yt_get_channel_videos(channel)
+        ])
+    except IndexError:
+        return flask.redirect(flask.url_for('videos',
+            channel = channel
+        ))
+
+    return flask.redirect(flask.url_for('videos',
+        channel = channel, video = choice)
+    )
 
 def web_channels(user = None, subs = None, tracks = [], tracking = False, error = False):
     try:
@@ -166,7 +183,8 @@ def web_channels(user = None, subs = None, tracks = [], tracking = False, error 
         error = flask.session.pop('channels_query_error')
 
     return flask.render_template('channels.html', user = flask.session['user'],
-        subs = yt_get_subscriptions(list_only = True), tracks = yt_get_tracks(),
+        subs = yt_get_subscriptions(list_only = True),
+        tracks = db_get_tracks(sort_by_played = False),
         tracking = tracking, error = error)
 
 def web_channels_track(user = None, subs = [], tracks = [], tracking = True, error = False):
@@ -176,7 +194,8 @@ def web_channels_track(user = None, subs = [], tracks = [], tracking = True, err
         return flask.redirect(str(e))
 
     return flask.render_template('channels.html', user = flask.session['user'],
-        subs = yt_get_subscriptions(), tracks = db_get_channels(),
+        subs = yt_get_subscriptions(),
+        tracks = db_get_tracks(sort_by_played = None),
         tracking = tracking, error = error)
 
 def web_channels_update():
@@ -185,67 +204,71 @@ def web_channels_update():
     except Exception as e:
         return flask.redirect(str(e))
 
-    db = get_db()
     tracks = flask.request.args.get('tracks', None)
     query = flask.request.args.get('query', None)
 
     if tracks is not None:
-        for channel_id, tracked in json.loads(urllib.parse.unquote(tracks)).items():
-            if tracked:
-                if channel_id not in db[flask.session['user']['id']]:
-                    db[flask.session['user']['id']][channel_id] = {
-                        'played': {}, 'archived': {}
-                    }
-            else:
-                if channel_id in db[flask.session['user']['id']]:
-                    db[flask.session['user']['id']].pop(channel_id)
+        web_channels_update_tracks(tracks)
 
     if query is not None:
-        client = yt_get_client()
-        query_data = json.loads(urllib.parse.unquote(query))
-
         try:
-            if query_data['type'] == 'url':
-                url = query_data['value']
-                if '/user/' in url:
-                    user = re.search('^.+\/user\/([^\/]+)(\/.*|$)', url, re.IGNORECASE).group(1)
-                    response = client.channels().list(
-                        part = 'snippet', forUsername = user
-                    ).execute()
-                    db[flask.session['user']['id']][response['items'][0]['id']] = {
-                        'played': {}, 'archived': {}
-                    }
-                elif '/channel/' in url:
-                    channel_id = url.rsplit('/', 1)[-1]
-                    response = client.channels().list(
-                        part = 'snippet', id = channel_id
-                    ).execute()
-                    db[flask.session['user']['id']][response['items'][0]['id']] = {
-                        'played': {}, 'archived': {}
-                    }
-                else:
-                    raise
-            elif query_data['type'] == 'user':
-                response = client.channels().list(
-                    part = 'snippet', forUsername = query_data['value']
-                ).execute()
-                db[flask.session['user']['id']][response['items'][0]['id']] = {
-                    'played': {}, 'archived': {}
-                }
-            elif query_data['type'] == 'id':
-                response = client.channels().list(
-                    part = 'snippet', id = query_data['value']
-                ).execute()
-                db[flask.session['user']['id']][response['items'][0]['id']] = {
-                    'played': {}, 'archived': {}
-                }
+            web_channels_update_query(query)
         except:
             flask.session['channels_query_error'] = True
             return flask.redirect('channels')
 
+    return flask.redirect('channels')
+
+def web_channels_update_tracks(tracks):
+    db = get_db()
+    user_id = flask.session['user']['id']
+
+    for channel_id, tracked in json.loads(urllib.parse.unquote(tracks)).items():
+        if tracked:
+            if channel_id not in db[user_id]:
+                db[user_id][channel_id] = {
+                    'played': {}, 'archived': {}
+                }
+        else:
+            if channel_id in db[user_id]:
+                db[user_id].pop(channel_id)
+
     update_db(db)
 
-    return flask.redirect('channels')
+def web_channels_update_query(query):
+    db = get_db()
+    query_data = json.loads(urllib.parse.unquote(query))
+    user_id = flask.session['user']['id']
+
+    if query_data['type'] == 'url':
+        url = query_data['value']
+        if '/user/' in url:
+            user = re.search('^.+\/user\/([^\/]+)(\/.*|$)', url,
+                re.IGNORECASE).group(1)
+            channel = yt_get_channel('snippet', user = user)
+            db[user_id][channel['id']] = {
+                'played': {}, 'archived': {}
+            }
+        elif '/channel/' in url:
+            channel_id = url.rsplit('/', 1)[-1]
+            channel = yt_get_channel('snippet', channel_id = channel_id)
+            db[user_id][channel['id']] = {
+                'played': {}, 'archived': {}
+            }
+        else:
+            raise
+    elif query_data['type'] == 'user':
+        channel = yt_get_channel('snippet', user = query_data['value'])
+        db[user_id][channel['id']] = {
+            'played': {}, 'archived': {}
+        }
+    elif query_data['type'] == 'id':
+        channel = yt_get_channel('snippet', id = query_data['value'])
+        db[user_id][channel['id']] = {
+            'played': {}, 'archived': {}
+        }
+
+    update_db(db)
 
 def web_channels_subscriptions():
     try:
@@ -253,26 +276,18 @@ def web_channels_subscriptions():
     except Exception as e:
         return flask.redirect(str(e))
 
-    client = yt_get_client()
     update = flask.request.args.get('update', None)
 
     if update is not None:
         update_data = json.loads(urllib.parse.unquote(update))
 
         if update_data['subscribe']:
-            client.subscriptions().insert(
-                body = build_resource({
-                    'snippet.resourceId.kind': 'youtube#channel',
-                    'snippet.resourceId.channelId': update_data['id']
-                }),
-                part = 'snippet'
-            ).execute()
+            yt_create_subscription(update_data['id'])
+            time.sleep(10)
         else:
-            client.subscriptions().delete(
-                id = update_data['id']
-            ).execute()
+            yt_remove_subscription(update_data['id'])
+            time.sleep(10)
 
-        time.sleep(10)
         return flask.redirect(update_data['redirect'])
 
     return flask.redirect('channels')
@@ -292,57 +307,71 @@ def web_archive_insert_rename(type = None, id = None):
     except Exception as e:
         return flask.redirect(str(e))
 
-    db = get_db()
-
     if id is not None:
         if type == 'video':
-            video_id = id
-            video = yt_get_video(video_id)
-
-            archive = None
-            for playlist in db_get_archives():
-                if playlist['contentDetails']['itemCount'] < 5000:
-                    archive = playlist
-                    break
-
-            if archive is None:
-                archive = yt_create_archive()
-
-            if yt_insert_to_playlist(video_id, archive['id']):
-                if video['snippet']['channelId'] not in db[flask.session['user']['id']]:
-                    db[flask.session['user']['id']][video['snippet']['channelId']] = {
-                        'played': {}, 'archived': {}
-                    }
-                db[flask.session['user']['id']][video['snippet']['channelId']]['archived'][video_id] = archive['id']
-                update_db(db)
+            web_archive_insert_video(id)
         elif type == 'playlist':
-            for item in yt_get_playlist_items(id):
-                video_id = item['snippet']['resourceId']['videoId']
-                video = yt_get_video(video_id)
-
-                archive = None
-                for playlist in db_get_archives():
-                    if playlist['contentDetails']['itemCount'] < 5000:
-                        archive = playlist
-                        break
-
-                if archive is None:
-                    archive = yt_create_archive()
-
-                if yt_insert_to_playlist(video_id, archive['id']):
-                    if video['snippet']['channelId'] not in db[flask.session['user']['id']]:
-                        db[flask.session['user']['id']][video['snippet']['channelId']] = {
-                            'played': {}, 'archived': {}
-                        }
-                    db[flask.session['user']['id']][video['snippet']['channelId']]['archived'][video_id] = archive['id']
-                    update_db(db)
+            web_archive_import_playlist(id)
         elif type == 'rename':
-            name = flask.request.args.get('name', None)
-            if name is not None:
-                yt_rename_playlist(id, name)
-                time.sleep(5)
+            web_archive_rename(id, flask.request.args.get('name', None))
 
     return flask.redirect(flask.url_for('archive'))
+
+def web_archive_insert_video(id):
+    db = get_db()
+    user_id = flask.session['user']['id']
+
+    video_id = id
+    video = yt_get_video(video_id)
+    channel_id = video['snippet']['channelId']
+
+    archive = None
+    for playlist in db_get_archives():
+        if playlist['contentDetails']['itemCount'] < 5000:
+            archive = playlist
+            break
+
+    if archive is None:
+        archive = yt_create_playlist()
+
+    if yt_insert_to_playlist(video_id, archive['id']):
+        if channel_id not in db[user_id]:
+            db[user_id][channel_id] = {
+                'played': {}, 'archived': {}
+            }
+        db[user_id][channel_id]['archived'][video_id] = archive['id']
+        update_db(db)
+
+def web_archive_import_playlist(id):
+    db = get_db()
+    user_id = flask.session['user']['id']
+
+    for item in yt_get_playlist_items(id):
+        video_id = item['snippet']['resourceId']['videoId']
+        video = yt_get_video(video_id)
+        channel_id = video['snippet']['channelId']
+
+        archive = None
+        for playlist in db_get_archives():
+            if playlist['contentDetails']['itemCount'] < 5000:
+                archive = playlist
+                break
+
+        if archive is None:
+            archive = yt_create_playlist()
+
+        if yt_insert_to_playlist(video_id, archive['id']):
+            if channel_id not in db[user_id]:
+                db[user_id][channel_id] = {
+                    'played': {}, 'archived': {}
+                }
+            db[user_id][channel_id]['archived'][video_id] = archive['id']
+            update_db(db)
+
+def web_archive_rename(id, name):
+    if name is not None:
+        yt_rename_playlist(id, name)
+        time.sleep(5)
 
 def web_archive_batch():
     try:
@@ -395,7 +424,10 @@ def web_archive_comments():
               )
 
     archive_comments.seek(0)
-    return flask.send_file(archive_comments, mimetype = 'application/zip', as_attachment = True, attachment_filename = 'archive_comments.zip')
+    return flask.send_file(
+        archive_comments, mimetype = 'application/zip',
+        as_attachment = True, attachment_filename = 'archive_comments.zip'
+    )
 
 def web_archive_config():
     try:
