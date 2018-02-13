@@ -132,7 +132,7 @@ def yt_remove_subscription(subscription_id):
     """
 
     try:
-        client.subscriptions().delete(
+        yt_get_client().subscriptions().delete(
             id = subscription_id
         ).execute()
     except googleapiclient.errors.Error:
