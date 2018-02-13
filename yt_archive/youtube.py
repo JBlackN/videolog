@@ -249,7 +249,7 @@ def yt_get_video(video_id):
             id = video_id
         ).execute()['items'][0]['rating']
 
-        for playlist_id, data in yt_get_playlists().items():
+        for playlist_id, data in yt_get_playlists(no_items = True).items():
             video['playlists'][playlist_id] = {}
             video['playlists'][playlist_id]['title'] = data['title']
             if video['id'] in data['videos']:
@@ -347,7 +347,7 @@ def yt_get_comment_replies(comment_id):
         else:
             kwargs['pageToken'] = response['nextPageToken']
 
-def yt_get_playlists():
+def yt_get_playlists(no_items = False):
     """Gets YouTube playlists.
 
     Gets all authenticated user's YouTube playlists in form of
@@ -378,9 +378,12 @@ def yt_get_playlists():
                 kwargs['pageToken'] = response['nextPageToken']
 
         for playlist_id in playlists.keys():
-            playlists[playlist_id]['videos'] = (
-                yt_get_playlist_items(playlist_id, video_ids_only = True)
-            )
+            if no_items:
+                playlists[playlist_id]['videos'] = []
+            else:
+                playlists[playlist_id]['videos'] = (
+                    yt_get_playlist_items(playlist_id, video_ids_only = True)
+                )
     except googleapiclient.errors.Error:
         return {}
 
