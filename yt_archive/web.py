@@ -23,7 +23,7 @@ from yt_archive.youtube import yt_create_subscription, yt_remove_subscription
 from yt_archive.youtube import yt_get_channel, yt_get_channel_videos, yt_get_playlist_items
 from yt_archive.youtube import yt_get_video, yt_get_comments
 from yt_archive.youtube import yt_create_playlist, yt_rename_playlist
-from yt_archive.youtube import yt_insert_to_playlist
+from yt_archive.youtube import yt_insert_to_playlist, yt_remove_from_playlist
 
 def web_index():
     """Index route handler.
@@ -386,6 +386,9 @@ def web_channels_update_tracks(tracks):
                 }
         else:
             if channel_id in db[user_id]:
+                channel = db[user_id][channel_id]
+                for video_id, archive_id in channel['archived'].items():
+                    yt_remove_from_playlist(video_id, archive_id)
                 db[user_id].pop(channel_id)
 
     update_db(db)
