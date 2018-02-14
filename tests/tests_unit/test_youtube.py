@@ -1,13 +1,35 @@
 import json
 
+import flask
 import flexmock
+import google.oauth2.credentials
+import googleapiclient.discovery
 import pytest
 
+from yt_archive.app import app
+from yt_archive.constants import API_SERVICE_NAME, API_VERSION
 from yt_archive.helpers import build_resource
+from yt_archive.youtube import yt_get_client
 from yt_archive.youtube import yt_get_user, yt_get_subscriptions
 from yt_archive.youtube import yt_get_channel, yt_get_channel_videos
 
 DB_FIXTURE_PATH = './tests/fixtures/db.json'
+
+def test_yt_get_client():
+    import yt_archive.youtube
+    (flexmock(yt_archive.youtube)
+        .should_call('googleapiclient.discovery.build')
+        .with_args(API_SERVICE_NAME, API_VERSION, credentials =
+            google.oauth2.credentials.Credentials)
+        .and_return(googleapiclient.discovery.Resource))
+
+    with app.test_client() as client:
+        with client.session_transaction() as session:
+            session['credentials'] = {
+                'token': 'test_token'
+            }
+        client.get('/')
+        yt_get_client()
 
 def test_yt_get_user():
     import yt_archive.youtube
