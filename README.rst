@@ -7,6 +7,23 @@ video comments.
 
 .. _youtube-dl: https://rg3.github.io/youtube-dl/
 
+|
+
+.. image:: ./screenshot2.png
+
+|
+
+.. image:: ./screenshot3.jpg
+
+|
+
+.. image:: ./screenshot1.png
+
+|
+
+.. image:: ./screenshot4.png
+
+
 Installation
 ------------
 
