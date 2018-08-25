@@ -1,7 +1,7 @@
-yt_archive
-==========
+videolog
+========
 
 .. toctree::
    :maxdepth: 4
 
-   yt_archive
+   videolog

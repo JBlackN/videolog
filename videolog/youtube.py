@@ -9,9 +9,9 @@ import google.oauth2.credentials
 import googleapiclient.discovery
 import googleapiclient.errors
 
-from yt_archive.constants import API_SERVICE_NAME, API_VERSION
-from yt_archive.db import get_db, db_get_archives, db_get_video
-from yt_archive.helpers import build_resource
+from videolog.constants import API_SERVICE_NAME, API_VERSION
+from videolog.db import get_db, db_get_archives, db_get_video
+from videolog.helpers import build_resource
 
 def yt_get_client():
     """Gets YouTube API client.
@@ -275,7 +275,7 @@ def yt_get_comments(video_id):
         list: YouTube video comments.
 
     See also:
-        :func:`~yt_archive.youtube.yt_get_comment_replies()`
+        :func:`~videolog.youtube.yt_get_comment_replies()`
     """
 
     client = yt_get_client()

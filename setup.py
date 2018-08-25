@@ -4,15 +4,15 @@ with open('README.rst') as f:
     long_description = ''.join(f.readlines())
 
 setup(
-    name = 'yt_archive',
+    name = 'videolog',
     version = '0.1',
-    description = 'YouTube playback manager and archiver.',
+    description = 'Video watch history tracker and archiver. Developed with YouTube.',
     long_description = long_description,
     author = 'Petr Schmied',
-    author_email = 'peter9209@gmail.com',
-    keywords = 'YouTube play random archive',
+    author_email = 'contact@petrschmied.com',
+    keywords = 'watch history log track random archive YouTube',
     license = 'MIT',
-    url = 'https://gitlab.fit.cvut.cz/schmipe5/yt_archive',
+    url = 'https://github.com/JBlackN/videolog',
     classifiers = [
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
@@ -53,12 +53,12 @@ setup(
 
     packages = find_packages(),
     package_data = {
-        'yt_archive': ['static/css/*.css', 'static/js/*.js', 'templates/*.html']
+        'videolog': ['static/css/*.css', 'static/js/*.js', 'templates/*.html']
     },
 
     entry_points = {
         'console_scripts': [
-            'yt_archive = yt_archive.cli:main'
+            'videolog = videolog.cli:main'
         ]
     },
 

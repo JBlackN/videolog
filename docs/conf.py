@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# yt_archive documentation build configuration file, created by
+# videolog documentation build configuration file, created by
 # sphinx-quickstart on Fri Feb  9 18:57:14 2018.
 #
 # This file is execfile()d with the current directory set to its
@@ -51,7 +51,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'yt_archive'
+project = 'videolog'
 copyright = '2018, Petr Schmied'
 author = 'Petr Schmied'
 
@@ -117,7 +117,7 @@ html_sidebars = {
 # -- Options for HTMLHelp output ------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'yt_archivedoc'
+htmlhelp_basename = 'videologdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -144,7 +144,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'yt_archive.tex', 'yt\\_archive Documentation',
+    (master_doc, 'videolog.tex', 'videolog Documentation',
      'Petr Schmied', 'manual'),
 ]
 
@@ -154,7 +154,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'yt_archive', 'yt_archive Documentation',
+    (master_doc, 'videolog', 'videolog Documentation',
      [author], 1)
 ]
 
@@ -165,8 +165,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'yt_archive', 'yt_archive Documentation',
-     author, 'yt_archive', 'One line description of project.',
+    (master_doc, 'videolog', 'videolog Documentation',
+     author, 'videolog', 'One line description of project.',
      'Miscellaneous'),
 ]
 

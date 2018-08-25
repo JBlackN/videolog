@@ -8,11 +8,11 @@ import os
 
 import click
 
-from yt_archive.app import app
+from videolog.app import app
 
-@click.group(name = 'yt_archive')
+@click.group(name = 'videolog')
 @click.version_option(version = '0.1',
-                      prog_name = 'YouTube Archive')
+                      prog_name = 'Videolog')
 @click.pass_context
 def cli(ctx):
     ...

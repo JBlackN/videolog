@@ -9,15 +9,15 @@ import urllib
 
 import flask
 
-from yt_archive.auth import auth_check
-from yt_archive.db import get_db, update_db
-from yt_archive.db import db_get_archives
-from yt_archive.youtube import yt_get_client
-from yt_archive.youtube import yt_get_subscriptions
-from yt_archive.youtube import yt_create_subscription, yt_remove_subscription
-from yt_archive.youtube import yt_get_comments
-from yt_archive.youtube import yt_create_playlist
-from yt_archive.youtube import yt_insert_to_playlist, yt_remove_from_playlist
+from videolog.auth import auth_check
+from videolog.db import get_db, update_db
+from videolog.db import db_get_archives
+from videolog.youtube import yt_get_client
+from videolog.youtube import yt_get_subscriptions
+from videolog.youtube import yt_create_subscription, yt_remove_subscription
+from videolog.youtube import yt_get_comments
+from videolog.youtube import yt_create_playlist
+from videolog.youtube import yt_insert_to_playlist, yt_remove_from_playlist
 
 def api_video_play(channel = None, video = None):
     """API video play route handler.

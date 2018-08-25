@@ -1,5 +1,5 @@
 import pytest
-from yt_archive.helpers import build_resource, allowed_file
+from videolog.helpers import build_resource, allowed_file
 
 def test_build_resource():
     assert build_resource({}) == {}

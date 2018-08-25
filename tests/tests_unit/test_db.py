@@ -5,14 +5,14 @@ import builtins
 import flexmock
 import pytest
 
-from yt_archive.db import get_db, update_db
-from yt_archive.db import db_get_tracks
+from videolog.db import get_db, update_db
+from videolog.db import db_get_tracks
 
 DB_FIXTURE_PATH = './tests/fixtures/db.json'
 
 @pytest.fixture
 def testapp():
-    from yt_archive.app import app
+    from videolog.app import app
     app.config['TESTING'] = True
     return app.test_client()
 
@@ -62,8 +62,8 @@ def test_db_get_tracks():
 
         #assert session['user']['id'] == 'user_id2'
         client.get('/')
-        import yt_archive.db
-        flexmock(yt_archive.db, get_db = json.load(open(DB_FIXTURE_PATH)))
+        import videolog.db
+        flexmock(videolog.db, get_db = json.load(open(DB_FIXTURE_PATH)))
         assert db_get_tracks() == db_get_tracks(sort_by_played = None)
 
         #with app.app_context():

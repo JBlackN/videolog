@@ -7,9 +7,9 @@ import flask
 import google_auth_oauthlib.flow
 import requests
 
-from yt_archive.constants import CLIENT_SECRETS_FILE, SCOPES
-from yt_archive.db import get_db, update_db
-from yt_archive.youtube import yt_get_user
+from videolog.constants import CLIENT_SECRETS_FILE, SCOPES
+from videolog.db import get_db, update_db
+from videolog.youtube import yt_get_user
 
 def auth_authorize():
     """Authorization route handler.

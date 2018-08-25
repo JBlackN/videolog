@@ -4,7 +4,9 @@ __pycache__/
 docs/_build/
 .eggs/
 .pytest_cache/
-yt_archive.egg-info/
+videolog.egg-info/
+build/
+dist/
 
 client_secret.json
 db.json

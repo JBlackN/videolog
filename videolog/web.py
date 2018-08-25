@@ -13,17 +13,17 @@ import zipfile
 
 import flask
 
-from yt_archive.auth import auth_check
-from yt_archive.db import get_db, update_db
-from yt_archive.db import db_get_archived, db_get_archives, db_get_tracks
-from yt_archive.db import db_update_archives
-from yt_archive.helpers import allowed_file
-from yt_archive.youtube import yt_get_subscriptions
-from yt_archive.youtube import yt_create_subscription, yt_remove_subscription
-from yt_archive.youtube import yt_get_channel, yt_get_channel_videos, yt_get_playlist_items
-from yt_archive.youtube import yt_get_video, yt_get_comments
-from yt_archive.youtube import yt_create_playlist, yt_rename_playlist
-from yt_archive.youtube import yt_insert_to_playlist, yt_remove_from_playlist
+from videolog.auth import auth_check
+from videolog.db import get_db, update_db
+from videolog.db import db_get_archived, db_get_archives, db_get_tracks
+from videolog.db import db_update_archives
+from videolog.helpers import allowed_file
+from videolog.youtube import yt_get_subscriptions
+from videolog.youtube import yt_create_subscription, yt_remove_subscription
+from videolog.youtube import yt_get_channel, yt_get_channel_videos, yt_get_playlist_items
+from videolog.youtube import yt_get_video, yt_get_comments
+from videolog.youtube import yt_create_playlist, yt_rename_playlist
+from videolog.youtube import yt_insert_to_playlist, yt_remove_from_playlist
 
 def web_index():
     """Index route handler.
@@ -62,11 +62,11 @@ def web_videos(user = None, tracks = [], subs = [], channel = None, video = None
         flask.Response: Videos list or video detail view page.
 
     See also:
-        :func:`~yt_archive.web.web_videos_filter()`,
-        :func:`~yt_archive.web.web_videos_random_unplayed()`,
-        :func:`~yt_archive.web.web_videos_next_unplayed()`,
-        :func:`~yt_archive.web.web_videos_random_archived()`,
-        :func:`~yt_archive.web.web_videos_random_all()`
+        :func:`~videolog.web.web_videos_filter()`,
+        :func:`~videolog.web.web_videos_random_unplayed()`,
+        :func:`~videolog.web.web_videos_next_unplayed()`,
+        :func:`~videolog.web.web_videos_random_archived()`,
+        :func:`~videolog.web.web_videos_random_all()`
     """
 
     try:
@@ -342,8 +342,8 @@ def web_channels_update():
         flask.Response: Channels management page.
 
     See also:
-        :func:`~yt_archive.web.web_channels_update_tracks()`,
-        :func:`~yt_archive.web.web_channels_update_query()`
+        :func:`~videolog.web.web_channels_update_tracks()`,
+        :func:`~videolog.web.web_channels_update_query()`
     """
 
     try:
@@ -506,9 +506,9 @@ def web_archive_insert_rename(type = None, id = None):
         flask.Response: Archive management view.
 
     See also:
-        :func:`~yt_archive.web.web_archive_insert_video()`,
-        :func:`~yt_archive.web.web_archive_import_playlist()`,
-        :func:`~yt_archive.web.web_archive_rename()`
+        :func:`~videolog.web.web_archive_insert_video()`,
+        :func:`~videolog.web.web_archive_import_playlist()`,
+        :func:`~videolog.web.web_archive_rename()`
     """
 
     try:

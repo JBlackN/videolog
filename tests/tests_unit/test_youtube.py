@@ -6,18 +6,18 @@ import google.oauth2.credentials
 import googleapiclient.discovery
 import pytest
 
-from yt_archive.app import app
-from yt_archive.constants import API_SERVICE_NAME, API_VERSION
-from yt_archive.helpers import build_resource
-from yt_archive.youtube import yt_get_client
-from yt_archive.youtube import yt_get_user, yt_get_subscriptions
-from yt_archive.youtube import yt_get_channel, yt_get_channel_videos
+from videolog.app import app
+from videolog.constants import API_SERVICE_NAME, API_VERSION
+from videolog.helpers import build_resource
+from videolog.youtube import yt_get_client
+from videolog.youtube import yt_get_user, yt_get_subscriptions
+from videolog.youtube import yt_get_channel, yt_get_channel_videos
 
 DB_FIXTURE_PATH = './tests/fixtures/db.json'
 
 def test_yt_get_client():
-    import yt_archive.youtube
-    (flexmock(yt_archive.youtube)
+    import videolog.youtube
+    (flexmock(videolog.youtube)
         .should_call('googleapiclient.discovery.build')
         .with_args(API_SERVICE_NAME, API_VERSION, credentials =
             google.oauth2.credentials.Credentials)
@@ -32,8 +32,8 @@ def test_yt_get_client():
         yt_get_client()
 
 def test_yt_get_user():
-    import yt_archive.youtube
-    flexmock(yt_archive.youtube, yt_get_client = flexmock(
+    import videolog.youtube
+    flexmock(videolog.youtube, yt_get_client = flexmock(
         channels = lambda: flexmock(
             list = lambda *args, **kwargs: flexmock(
                 execute = lambda: json.load(open(
@@ -52,8 +52,8 @@ def test_yt_get_user():
     }
 
 def test_yt_get_subscriptions():
-    import yt_archive.youtube
-    flexmock(yt_archive.youtube, yt_get_client = flexmock(
+    import videolog.youtube
+    flexmock(videolog.youtube, yt_get_client = flexmock(
         subscriptions = lambda: flexmock(
             list = lambda *args, **kwargs: flexmock(
                 execute = lambda: (
@@ -77,8 +77,8 @@ def test_yt_get_subscriptions():
     }
 
 def test_yt_get_channel():
-    import yt_archive.youtube
-    flexmock(yt_archive.youtube, yt_get_client = flexmock(
+    import videolog.youtube
+    flexmock(videolog.youtube, yt_get_client = flexmock(
         channels = lambda: flexmock(
             list = lambda *args, **kwargs: flexmock(
                 execute = lambda: (
@@ -95,8 +95,8 @@ def test_yt_get_channel():
     )
 
 def test_yt_get_channel_videos():
-    import yt_archive.youtube
-    flexmock(yt_archive.youtube, yt_get_client = flexmock(
+    import videolog.youtube
+    flexmock(videolog.youtube, yt_get_client = flexmock(
         channels = lambda: flexmock(
             list = lambda *args, **kwargs: flexmock(
                 execute = lambda: json.load(open(
@@ -114,8 +114,8 @@ def test_yt_get_channel_videos():
             )
         )
     ))
-    flexmock(yt_archive.youtube, db_get_video = None)
-    flexmock(yt_archive.youtube, get_db = json.load(open(DB_FIXTURE_PATH)))
+    flexmock(videolog.youtube, db_get_video = None)
+    flexmock(videolog.youtube, get_db = json.load(open(DB_FIXTURE_PATH)))
 
     result = yt_get_channel_videos('UC_x5XG1OV2P6uZZ5FSM9Ttw')
 

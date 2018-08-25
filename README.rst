@@ -1,8 +1,11 @@
-yt_archive
-==========
+Videolog
+========
 
-Web application for tracking progress while watching YouTube channel videos,
-archiving them using youtube-dl and downloading their comments.
+Web application for YouTube_ channel watch progress tracking. Is also able to
+generate input files and settings for youtube-dl_ and to download YouTube_
+video comments.
+
+.. _youtube-dl: https://rg3.github.io/youtube-dl/
 
 Installation
 ------------
@@ -16,8 +19,9 @@ Client secret
 
 **!!! IMPORTANT !!!**
 
-Application uses Youtube Data API with OAuth 2.0, therefore client secret file
-is needed. See guide_ how to obtain it. Place it in application's root directory.
+Application uses YouTube_ Data API with OAuth 2.0, therefore client secret file
+is needed. See guide_ how to obtain it. Place it in application's root directory
+(client_secret.json).
 
 .. _guide: https://developers.google.com/youtube/v3/quickstart/python#step_1_turn_on_the_api_name
 
@@ -26,13 +30,13 @@ Usage
 
 .. code-block:: bash
 
-   python -m yt_archive run
+   python -m videolog run
 
 or
 
 .. code-block:: bash
 
-   yt_archive run
+   videolog run
 
 Testing
 -------
@@ -62,3 +66,6 @@ License
 
 This project is licensed under the MIT License - see the
 `LICENSE <../../../LICENSE>`_ file for more details.
+
+
+.. _YouTube: https://www.youtube.com/

@@ -1,77 +1,77 @@
-yt\_archive package
+videolog package
 ===================
 
 Submodules
 ----------
 
-yt\_archive\.api module
+videolog\.api module
 -----------------------
 
-.. automodule:: yt_archive.api
+.. automodule:: videolog.api
     :members:
     :undoc-members:
     :show-inheritance:
 
-yt\_archive\.app module
+videolog\.app module
 -----------------------
 
-.. automodule:: yt_archive.app
+.. automodule:: videolog.app
     :members:
     :undoc-members:
     :show-inheritance:
 
-yt\_archive\.auth module
+videolog\.auth module
 ------------------------
 
-.. automodule:: yt_archive.auth
+.. automodule:: videolog.auth
     :members:
     :undoc-members:
     :show-inheritance:
 
-yt\_archive\.cli module
+videolog\.cli module
 -----------------------
 
-.. automodule:: yt_archive.cli
+.. automodule:: videolog.cli
     :members:
     :undoc-members:
     :show-inheritance:
 
-yt\_archive\.constants module
+videolog\.constants module
 -----------------------------
 
-.. automodule:: yt_archive.constants
+.. automodule:: videolog.constants
     :members:
     :undoc-members:
     :show-inheritance:
 
-yt\_archive\.db module
+videolog\.db module
 ----------------------
 
-.. automodule:: yt_archive.db
+.. automodule:: videolog.db
     :members:
     :undoc-members:
     :show-inheritance:
 
-yt\_archive\.helpers module
+videolog\.helpers module
 ---------------------------
 
-.. automodule:: yt_archive.helpers
+.. automodule:: videolog.helpers
     :members:
     :undoc-members:
     :show-inheritance:
 
-yt\_archive\.web module
+videolog\.web module
 -----------------------
 
-.. automodule:: yt_archive.web
+.. automodule:: videolog.web
     :members:
     :undoc-members:
     :show-inheritance:
 
-yt\_archive\.youtube module
+videolog\.youtube module
 ---------------------------
 
-.. automodule:: yt_archive.youtube
+.. automodule:: videolog.youtube
     :members:
     :undoc-members:
     :show-inheritance:
@@ -80,7 +80,7 @@ yt\_archive\.youtube module
 Module contents
 ---------------
 
-.. automodule:: yt_archive
+.. automodule:: videolog
     :members:
     :undoc-members:
     :show-inheritance:

@@ -9,7 +9,7 @@ if "%SPHINXBUILD%" == "" (
 )
 set SOURCEDIR=.
 set BUILDDIR=_build
-set SPHINXPROJ=yt_archive
+set SPHINXPROJ=videolog
 
 if "%1" == "" goto help
 

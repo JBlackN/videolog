@@ -43,7 +43,7 @@ def db_get_tracks(sort_by_played = None):
         list: Tracked channels or their IDs.
     """
 
-    from yt_archive.youtube import yt_get_channel
+    from videolog.youtube import yt_get_channel
     db = get_db()
 
     if sort_by_played is None:
@@ -86,7 +86,7 @@ def db_get_archives():
         list: YouTube archives (playlist objects).
     """
 
-    from yt_archive.youtube import yt_get_playlist
+    from videolog.youtube import yt_get_playlist
     db = get_db()
     archive_ids = set()
     archives = []
@@ -111,7 +111,7 @@ def db_update_archives():
         Works bidirectionally.
     """
 
-    from yt_archive.youtube import yt_get_playlist_items, yt_get_video
+    from videolog.youtube import yt_get_playlist_items, yt_get_video
     db = get_db()
     user_id = flask.session['user']['id']
 
