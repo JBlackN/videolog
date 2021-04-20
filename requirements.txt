@@ -22,7 +22,7 @@ MarkupSafe==1.0
 oauth2client==4.1.2
 oauthlib==2.0.6
 pluggy==0.6.0
-py==1.5.2
+py==1.10.0
 pyasn1==0.4.2
 pyasn1-modules==0.2.1
 Pygments==2.2.0
